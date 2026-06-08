@@ -1,0 +1,2 @@
+/// Wishlist item DTO.
+library;

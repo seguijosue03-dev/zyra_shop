@@ -1,0 +1,2 @@
+/// Cart item DTO.
+library;

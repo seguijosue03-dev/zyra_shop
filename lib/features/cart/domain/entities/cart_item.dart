@@ -1,0 +1,2 @@
+/// Cart item entity.
+library;

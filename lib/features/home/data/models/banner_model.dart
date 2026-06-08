@@ -1,0 +1,2 @@
+/// Home Banner DTO.
+library;

@@ -1,0 +1,2 @@
+/// Profile user entity.
+library;

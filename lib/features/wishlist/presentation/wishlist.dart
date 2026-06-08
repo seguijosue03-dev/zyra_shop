@@ -1,0 +1,2 @@
+/// Wishlist presentation barrel.
+library;

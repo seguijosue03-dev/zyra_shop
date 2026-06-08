@@ -1,0 +1,2 @@
+/// Admin user entity.
+library;

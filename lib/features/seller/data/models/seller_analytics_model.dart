@@ -1,0 +1,2 @@
+/// Seller analytics DTO.
+library;

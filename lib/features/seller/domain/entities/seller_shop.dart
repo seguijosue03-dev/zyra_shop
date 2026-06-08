@@ -1,0 +1,2 @@
+/// Seller shop entity.
+library;

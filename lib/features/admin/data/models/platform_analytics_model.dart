@@ -1,0 +1,2 @@
+/// Platform analytics DTO.
+library;

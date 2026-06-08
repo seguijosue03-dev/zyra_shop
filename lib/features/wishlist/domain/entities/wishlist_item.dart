@@ -1,0 +1,2 @@
+/// Wishlist item entity.
+library;

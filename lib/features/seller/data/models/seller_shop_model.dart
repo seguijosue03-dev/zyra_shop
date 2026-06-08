@@ -1,0 +1,2 @@
+/// Seller shop DTO.
+library;

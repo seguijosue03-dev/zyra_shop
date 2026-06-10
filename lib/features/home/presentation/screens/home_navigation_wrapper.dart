@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
 import 'package:zyra_shop/core/theme/app_text_styles.dart';
+import 'package:zyra_shop/core/state/app_state.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../widgets/mock_products.dart';
 import '../widgets/product_card.dart';
@@ -18,21 +19,9 @@ class HomeNavigationWrapper extends StatefulWidget {
 
 class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
   int _currentIndex = 0;
-  final Set<String> _favorites = {};
-  final List<String> _cart = ['e1', 'm1']; // Mock items in cart initially
 
   // Category filter state passed back to Accueil
   String _initialCategoryFilter = 'Tous';
-
-  void _onFavoriteToggle(Product product) {
-    setState(() {
-      if (_favorites.contains(product.id)) {
-        _favorites.remove(product.id);
-      } else {
-        _favorites.add(product.id);
-      }
-    });
-  }
 
   void _goToHomeWithCategory(String category) {
     setState(() {
@@ -47,8 +36,6 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
       // 0. Home Feed (Accueil)
       HomeFeedView(
         key: ValueKey('home_feed_$_initialCategoryFilter'),
-        favorites: _favorites,
-        onFavoriteToggle: _onFavoriteToggle,
       ),
 
       // 1. Categories Grid (Catégories)
@@ -239,8 +226,12 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
 
   // ── Tab 2: Favorites Page ───────────────────────────────────────────────────
   Widget _buildFavoritesPage() {
-    final List<Product> favoriteProducts =
-        mockProducts.where((p) => _favorites.contains(p.id)).toList();
+    return ListenableBuilder(
+      listenable: AppState(),
+      builder: (context, _) {
+        final List<Product> favoriteProducts = mockProducts
+            .where((p) => AppState().favorites.contains(p.id))
+            .toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -335,19 +326,21 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
                 return ProductCard(
                   product: product,
                   isFavorite: true,
-                  onFavoriteToggle: () => _onFavoriteToggle(product),
+                  onFavoriteToggle: () => AppState().toggleFavorite(product.id),
                 );
               },
             ),
-    );
+      );
+    });
   }
 
   // ── Tab 3: Cart Page ────────────────────────────────────────────────────────
   Widget _buildCartPage() {
-    final List<Product> cartProducts =
-        mockProducts.where((p) => _cart.contains(p.id)).toList();
-
-    double total = cartProducts.fold(0, (sum, p) => sum + p.price);
+    return ListenableBuilder(
+      listenable: AppState(),
+      builder: (context, _) {
+        final List<CartItemMock> cartItems = AppState().cartItems;
+        final double total = AppState().cartTotal;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -362,7 +355,7 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
           child: Container(color: AppColors.border, height: 1.2),
         ),
       ),
-      body: cartProducts.isEmpty
+      body: cartItems.isEmpty
           ? Center(
               child: Padding(
                 padding: const EdgeInsets.all(32),
@@ -431,9 +424,10 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.all(24),
-                    itemCount: cartProducts.length,
+                    itemCount: cartItems.length,
                     itemBuilder: (context, index) {
-                      final product = cartProducts[index];
+                      final item = cartItems[index];
+                      final product = item.product;
                       return Container(
                         margin: const EdgeInsets.only(bottom: 16),
                         padding: const EdgeInsets.all(12),
@@ -476,7 +470,7 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    product.category,
+                                    '${item.size} • ${item.color.value == Colors.black.value ? 'Noir' : item.color.value == Colors.white.value ? 'Blanc' : item.color.value == const Color(0xFFE8DCC4).value ? 'Beige' : 'Bleu'}',
                                     style: GoogleFonts.inter(
                                       fontSize: 11,
                                       color: AppColors.textSecondary,
@@ -495,24 +489,28 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
                               ),
                             ),
 
-                            // Delete Action
-                            IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline_rounded,
-                                color: Color(0xFFFF4B72),
-                                size: 22,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _cart.remove(product.id);
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Article retiré du panier'),
-                                    duration: Duration(seconds: 1),
+                            // Quantity and Delete Action
+                            Column(
+                              children: [
+                                Text('x${item.quantity}', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+                                const SizedBox(height: 8),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline_rounded,
+                                    color: Color(0xFFFF4B72),
+                                    size: 22,
                                   ),
-                                );
-                              },
+                                  onPressed: () {
+                                    AppState().removeFromCart(index);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Article retiré du panier'),
+                                        duration: Duration(seconds: 1),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -594,7 +592,8 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
                 ),
               ],
             ),
-    );
+      );
+    });
   }
 
   // ── Tab 4: Profile Page ─────────────────────────────────────────────────────

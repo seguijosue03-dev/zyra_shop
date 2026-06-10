@@ -3,21 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
 import 'package:zyra_shop/features/auth/presentation/widgets/zyra_logo_widget.dart';
+import 'package:zyra_shop/core/state/app_state.dart';
 import '../widgets/mock_products.dart';
 import '../widgets/product_card.dart';
+import 'package:zyra_shop/features/products/presentation/screens/product_detail_screen.dart';
 
 /// ZYRA Marketplace — Premium Home Feed
 /// Design: 80% white/gray/black neutral, 20% ZYRA brand purple accents.
 /// Inspired by Shein, Zara, Amazon, and Instagram Shopping.
 class HomeFeedView extends StatefulWidget {
-  final Set<String> favorites;
-  final Function(Product) onFavoriteToggle;
-
-  const HomeFeedView({
-    super.key,
-    required this.favorites,
-    required this.onFavoriteToggle,
-  });
+  const HomeFeedView({super.key});
 
   @override
   State<HomeFeedView> createState() => _HomeFeedViewState();
@@ -96,12 +91,15 @@ class _HomeFeedViewState extends State<HomeFeedView> {
     final bool isFilteredMode =
         _selectedCategory != 'Tous' || query.isNotEmpty;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ── Header ─────────────────────────────────
+    return ListenableBuilder(
+      listenable: AppState(),
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8F9FB),
+          body: SafeArea(
+            child: Column(
+              children: [
+                // ── Header ─────────────────────────────────
             _buildHeader(context),
 
             // ── Scrollable Body ─────────────────────────
@@ -183,7 +181,6 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                           ),
                         ),
                       ),
-
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -193,7 +190,8 @@ class _HomeFeedViewState extends State<HomeFeedView> {
         ),
       ),
     );
-  }
+  });
+}
 
   // ─────────────────────────────────────────────────────────────────────────
   // HEADER
@@ -568,7 +566,14 @@ class _HomeFeedViewState extends State<HomeFeedView> {
               return Padding(
                 padding: const EdgeInsets.only(right: 12, bottom: 8),
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductDetailScreen(product: p),
+                      ),
+                    );
+                  },
                   child: Container(
                     width: 200,
                     height: 88,
@@ -706,8 +711,16 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: ProductCard(
                   product: product,
-                  isFavorite: widget.favorites.contains(product.id),
-                  onFavoriteToggle: () => widget.onFavoriteToggle(product),
+                  isFavorite: AppState().isFavorite(product.id),
+                  onFavoriteToggle: () => AppState().toggleFavorite(product.id),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductDetailScreen(product: product),
+                      ),
+                    );
+                  },
                 ),
               );
             },
@@ -737,8 +750,16 @@ class _HomeFeedViewState extends State<HomeFeedView> {
           final product = products[index];
           return ProductCard(
             product: product,
-            isFavorite: widget.favorites.contains(product.id),
-            onFavoriteToggle: () => widget.onFavoriteToggle(product),
+            isFavorite: AppState().isFavorite(product.id),
+            onFavoriteToggle: () => AppState().toggleFavorite(product.id),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProductDetailScreen(product: product),
+                ),
+              );
+            },
           );
         },
       ),

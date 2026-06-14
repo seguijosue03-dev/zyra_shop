@@ -12,6 +12,7 @@ import '../widgets/seller_profile_section.dart';
 import '../widgets/product_reviews.dart';
 import '../widgets/recommended_products.dart';
 import '../widgets/bottom_action_bar.dart';
+import '../widgets/quantity_selector.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -25,6 +26,7 @@ class ProductDetailScreen extends StatefulWidget {
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String _selectedSize = 'M';
   Color _selectedColor = Colors.black;
+  int _quantity = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +73,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ColorSelector(
                             selectedColor: _selectedColor,
                             onColorSelected: (color) => setState(() => _selectedColor = color),
+                          ),
+                          const SizedBox(height: 24),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Quantité',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                QuantitySelector(
+                                  quantity: _quantity,
+                                  onChanged: (val) => setState(() => _quantity = val),
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 24),
                           const StockIndicator(status: StockStatus.inStock),
@@ -124,6 +147,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               product: widget.product,
               selectedSize: _selectedSize,
               selectedColor: _selectedColor,
+              quantity: _quantity,
             ),
           ),
         ],

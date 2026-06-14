@@ -16,11 +16,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
+  final _whatsappCtrl = TextEditingController();
   
   final _nameFocus = FocusNode();
   final _passwordFocus = FocusNode();
   final _emailFocus = FocusNode();
   final _phoneFocus = FocusNode();
+  final _whatsappFocus = FocusNode();
   
   bool _isLoading = false;
 
@@ -30,10 +32,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _passwordCtrl.dispose();
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
+    _whatsappCtrl.dispose();
     _nameFocus.dispose();
     _passwordFocus.dispose();
     _emailFocus.dispose();
     _phoneFocus.dispose();
+    _whatsappFocus.dispose();
     super.dispose();
   }
 
@@ -237,6 +241,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   icon: Icons.phone_outlined,
                                   hint: 'Numéro de téléphone',
                                   focusNode: _phoneFocus,
+                                  keyboardType: TextInputType.phone,
+                                  nextFocus: _whatsappFocus,
+                                ),
+                                const Divider(height: 1, color: Color(0xFFF0F0F0), indent: 24, endIndent: 24),
+                                _buildTextField(
+                                  controller: _whatsappCtrl,
+                                  icon: Icons.chat_outlined, // Fallback icon for WhatsApp
+                                  hint: 'Numéro WhatsApp',
+                                  focusNode: _whatsappFocus,
                                   keyboardType: TextInputType.phone,
                                 ),
                               ],

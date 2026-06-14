@@ -3,17 +3,20 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
 import 'package:zyra_shop/features/home/presentation/widgets/mock_products.dart';
 import 'package:zyra_shop/core/state/app_state.dart';
+import 'package:zyra_shop/features/checkout/presentation/screens/checkout_address_screen.dart' as zyra_checkout;
 
 class BottomActionBar extends StatelessWidget {
   final Product product;
   final String selectedSize;
   final Color selectedColor;
+  final int quantity;
 
   const BottomActionBar({
     super.key,
     required this.product,
     required this.selectedSize,
     required this.selectedColor,
+    required this.quantity,
   });
 
   @override
@@ -62,53 +65,80 @@ class BottomActionBar extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
-              child: Container(
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: AppColors.primaryGradientDiagonal,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () {
-                      AppState().addToCart(product, selectedSize, selectedColor);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Produit ajouté au panier'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    child: Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 22),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Ajouter au panier',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: AppColors.primary, width: 1.5),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () {
+                            AppState().addToCart(product, selectedSize, selectedColor, quantity);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Produit ajouté au panier'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          child: Center(
+                            child: Icon(Icons.add_shopping_cart_rounded, color: AppColors.primary, size: 24),
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      height: 56,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradientDiagonal,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () {
+                            AppState().startDirectCheckout(product, selectedSize, selectedColor, quantity);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const zyra_checkout.CheckoutAddressScreen()),
+                            );
+                          },
+                          child: Center(
+                            child: Text(
+                              'Acheter',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

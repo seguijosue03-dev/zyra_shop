@@ -7,8 +7,7 @@ import 'package:zyra_shop/core/state/app_state.dart';
 import '../widgets/mock_products.dart';
 import '../widgets/product_card.dart';
 import 'package:zyra_shop/features/products/presentation/screens/product_detail_screen.dart';
-
-/// ZYRA Marketplace — Premium Home Feed
+import 'package:zyra_shop/features/search/presentation/screens/search_screen.dart' as zyra_search;
 /// Design: 80% white/gray/black neutral, 20% ZYRA brand purple accents.
 /// Inspired by Shein, Zara, Amazon, and Instagram Shopping.
 class HomeFeedView extends StatefulWidget {
@@ -337,51 +336,44 @@ class _HomeFeedViewState extends State<HomeFeedView> {
         children: [
           // Main pill input
           Expanded(
-            child: Container(
-              height: 48,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(50),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 12,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: _searchCtrl,
-                onChanged: (val) => setState(() {}),
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: const Color(0xFF111827),
-                  fontWeight: FontWeight.w500,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const zyra_search.SearchScreen()),
+                );
+              },
+              child: Container(
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(50),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                decoration: InputDecoration(
-                  hintText: 'Rechercher tendances, marques, styles...',
-                  hintStyle: GoogleFonts.inter(
-                    color: const Color(0xFF9CA3AF),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  prefixIcon: const Icon(
-                    Icons.search_rounded,
-                    color: Color(0xFF374151),
-                    size: 20,
-                  ),
-                  suffixIcon: _searchCtrl.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear,
-                              size: 16, color: Color(0xFF374151)),
-                          onPressed: () {
-                            _searchCtrl.clear();
-                            setState(() {});
-                          },
-                        )
-                      : null,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 13),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.search_rounded,
+                      color: Color(0xFF374151),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Rechercher tendances, marques, styles...',
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF9CA3AF),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -389,25 +381,33 @@ class _HomeFeedViewState extends State<HomeFeedView> {
           const SizedBox(width: 10),
 
           // Filter button
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE5E7EB), width: 1.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.tune_rounded,
-              color: Color(0xFF374151),
-              size: 20,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const zyra_search.SearchScreen()),
+              );
+            },
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE5E7EB), width: 1.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.tune_rounded,
+                color: Color(0xFF374151),
+                size: 20,
+              ),
             ),
           ),
         ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
+import 'package:zyra_shop/core/theme/app_shadows.dart';
 import 'package:zyra_shop/features/home/presentation/widgets/mock_products.dart';
 import 'package:zyra_shop/core/state/app_state.dart';
 import 'package:zyra_shop/features/checkout/presentation/screens/checkout_address_screen.dart' as zyra_checkout;
@@ -28,13 +29,7 @@ class BottomActionBar extends StatelessWidget {
         border: const Border(
           top: BorderSide(color: AppColors.border, width: 1),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
+        boxShadow: AppShadows.bottomNav,
       ),
       child: SafeArea(
         top: false,

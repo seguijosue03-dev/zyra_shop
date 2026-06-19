@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
+import 'package:zyra_shop/core/theme/app_shadows.dart';
 import 'mock_products.dart';
 
 /// ZYRA Shop — Premium Product Card
@@ -11,6 +12,7 @@ class ProductCard extends StatelessWidget {
   final VoidCallback onFavoriteToggle;
   final VoidCallback? onTap;
   final bool showName;
+  final String heroTagPrefix;
 
   const ProductCard({
     super.key,
@@ -19,6 +21,7 @@ class ProductCard extends StatelessWidget {
     required this.onFavoriteToggle,
     this.onTap,
     this.showName = false,
+    this.heroTagPrefix = '',
   });
 
   @override
@@ -30,13 +33,7 @@ class ProductCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: AppShadows.premiumCard,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,16 +48,19 @@ class ProductCard extends StatelessWidget {
                   ),
                   child: AspectRatio(
                     aspectRatio: 0.80,
-                    child: Image.network(
-                      product.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
-                        color: const Color(0xFFF8F9FB),
-                        child: Center(
-                          child: Icon(
-                            Icons.image_outlined,
-                            size: 36,
-                            color: AppColors.textHint,
+                    child: Hero(
+                      tag: '${heroTagPrefix}product_image_${product.id}',
+                      child: Image.network(
+                        product.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Container(
+                          color: const Color(0xFFF8F9FB),
+                          child: Center(
+                            child: Icon(
+                              Icons.image_outlined,
+                              size: 36,
+                              color: AppColors.textHint,
+                            ),
                           ),
                         ),
                       ),
@@ -234,10 +234,10 @@ class ProductCard extends StatelessWidget {
   }
 
   String _formatPrice(double val, {bool isOldPrice = false}) {
-    if (val % 1 == 0) {
-      return isOldPrice ? '${val.toInt()},0 €' : '${val.toInt()} €';
+    if (val == val.toInt()) {
+      return isOldPrice ? '${val.toInt()} FCFA' : '${val.toInt()} FCFA';
     } else {
-      return '${val.toStringAsFixed(2).replaceAll('.', ',')} €';
+      return '${val.toStringAsFixed(0)} FCFA';
     }
   }
 }

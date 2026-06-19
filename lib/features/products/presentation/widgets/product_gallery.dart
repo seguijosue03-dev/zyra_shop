@@ -3,8 +3,9 @@ import 'package:zyra_shop/core/theme/app_colors.dart';
 
 class ProductGallery extends StatefulWidget {
   final List<String> images;
+  final String productId;
 
-  const ProductGallery({super.key, required this.images});
+  const ProductGallery({super.key, required this.images, required this.productId});
 
   @override
   State<ProductGallery> createState() => _ProductGalleryState();
@@ -28,12 +29,20 @@ class _ProductGalleryState extends State<ProductGallery> {
               });
             },
             itemBuilder: (context, index) {
-              return Image.network(
+              final image = Image.network(
                 widget.images[index],
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
               );
+              
+              if (index == 0) {
+                return Hero(
+                  tag: 'product_image_${widget.productId}',
+                  child: image,
+                );
+              }
+              return image;
             },
           ),
           Positioned(

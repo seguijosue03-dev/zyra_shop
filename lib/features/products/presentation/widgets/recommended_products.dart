@@ -78,7 +78,7 @@ class RecommendedProducts extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '€${product.price.toStringAsFixed(2)}',
+                            '${product.price.toStringAsFixed(0)} FCFA',
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,

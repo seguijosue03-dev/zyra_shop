@@ -59,7 +59,7 @@ class ProductInfo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '€${product.price.toStringAsFixed(2)}',
+                '${product.price.toStringAsFixed(0)} FCFA',
                 style: GoogleFonts.inter(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -69,7 +69,7 @@ class ProductInfo extends StatelessWidget {
               if (product.hasDiscount) ...[
                 const SizedBox(width: 8),
                 Text(
-                  '€${product.oldPrice!.toStringAsFixed(2)}',
+                  '${product.oldPrice!.toStringAsFixed(0)} FCFA',
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,

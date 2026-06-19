@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
+import 'package:zyra_shop/features/auth/providers/auth_providers.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import 'package:zyra_shop/features/home/presentation/home.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -32,10 +33,27 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _onSignIn() async {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
+
+    await ref.read(authNotifierProvider.notifier).login(
+      email: _emailCtrl.text.trim(),
+      password: _passwordCtrl.text.trim(),
+    );
+
     if (!mounted) return;
-    setState(() => _isLoading = false);
+
+    final authState = ref.read(authNotifierProvider);
+
+    if (authState.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authState.errorMessage!),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    // Login successful → navigate to home
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const HomeNavigationWrapper()),
     );
@@ -110,12 +128,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+    final isLoading = authState.isLoading;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAFAFA), // Slightly off-white to make the white container pop
+        backgroundColor: const Color(0xFFFAFAFA),
         body: Stack(
           children: [
             // ── Background Corner Blobs ──
@@ -160,11 +180,10 @@ class _LoginScreenState extends State<LoginScreen> {
             SafeArea(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(top: 140), // Push down to avoid top blob completely
+                padding: const EdgeInsets.only(top: 140),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title and Logo centered
                     Center(
                       child: Column(
                         children: [
@@ -184,11 +203,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 50),
 
-                    // Perfect Form Container
                     Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        // White Box
                         Container(
                           width: screenWidth * 0.82,
                           decoration: BoxDecoration(
@@ -230,9 +247,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
 
-                        // Action Button Perfectly Overlapping Right Edge
                         Positioned(
-                          right: -28, // Half of button width
+                          right: -28,
                           top: 0,
                           bottom: 0,
                           child: Center(
@@ -260,7 +276,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ],
                                 ),
-                                child: _isLoading
+                                child: isLoading
                                     ? const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)))
                                     : const Icon(Icons.arrow_forward, color: Colors.white, size: 24),
                               ),
@@ -270,7 +286,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
 
-                    // Forgot Password Left-Aligned
                     Container(
                       width: screenWidth * 0.82,
                       padding: const EdgeInsets.only(top: 16, left: 24),
@@ -281,7 +296,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           'Mot de passe oublié ?',
                           style: GoogleFonts.inter(
                             fontSize: 13,
-                            color: Colors.black45, // Slightly darker for better readability
+                            color: Colors.black45,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -293,7 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
-            // ── Register Pill attached to Left Edge ──
+            // ── Register Pill ──
             Positioned(
               bottom: 40,
               left: 0,
@@ -320,7 +335,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.error, // Red pill text like reference
+                      color: AppColors.error,
                     ),
                   ),
                 ),
@@ -332,5 +347,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
-

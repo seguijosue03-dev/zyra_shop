@@ -1,28 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
 import 'package:zyra_shop/core/theme/app_text_styles.dart';
+import 'package:zyra_shop/features/auth/providers/auth_providers.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/auth_gradient_button.dart';
 
-/// ZYRA Forgot Password Screen
-///
-/// Two animated states:
-///   [_InputState]   — E-mail field + send button
-///   [_SuccessState] — Animated checkmark + confirmation message
-///
-/// All text in French.
-class ForgotPasswordScreen extends StatefulWidget {
+class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
-  bool _isLoading = false;
   bool _emailSent = false;
 
   @override
@@ -34,18 +28,32 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Future<void> _onSendLink() async {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    // Mock API delay
-    await Future.delayed(const Duration(seconds: 2));
+
+    await ref.read(authNotifierProvider.notifier).forgotPassword(
+      email: _emailCtrl.text.trim(),
+    );
+
     if (!mounted) return;
-    setState(() {
-      _isLoading = false;
-      _emailSent = true;
-    });
+
+    final authState = ref.read(authNotifierProvider);
+
+    if (authState.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authState.errorMessage!),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _emailSent = true);
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -53,20 +61,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              // Header with back button
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: Row(
                   children: [
                     _BackButton(onTap: () => Navigator.pop(context)),
                   ],
                 ),
               ),
-
-              // Animated content switch
               Expanded(
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 450),
@@ -84,19 +86,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                   child: _emailSent
                       ? _SuccessView(
-                          key: const ValueKey('success'),
-                          email: _emailCtrl.text.trim(),
-                          onBackToLogin: () => Navigator.pop(context),
-                          onResend: () => setState(() => _emailSent = false),
-                        )
+                    key: const ValueKey('success'),
+                    email: _emailCtrl.text.trim(),
+                    onBackToLogin: () => Navigator.pop(context),
+                    onResend: () => setState(() => _emailSent = false),
+                  )
                       : _InputView(
-                          key: const ValueKey('input'),
-                          formKey: _formKey,
-                          emailCtrl: _emailCtrl,
-                          isLoading: _isLoading,
-                          onSend: _onSendLink,
-                          onBackToLogin: () => Navigator.pop(context),
-                        ),
+                    key: const ValueKey('input'),
+                    formKey: _formKey,
+                    emailCtrl: _emailCtrl,
+                    isLoading: authState.isLoading,
+                    onSend: _onSendLink,
+                    onBackToLogin: () => Navigator.pop(context),
+                  ),
                 ),
               ),
             ],
@@ -134,8 +136,6 @@ class _InputView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 20),
-
-          // Icon illustration
           Center(
             child: Container(
               width: 96,
@@ -159,8 +159,6 @@ class _InputView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 36),
-
-          // Heading
           Text('Mot de passe oublié ?', style: AppTextStyles.headlineLarge),
           const SizedBox(height: 12),
           Text(
@@ -168,8 +166,6 @@ class _InputView extends StatelessWidget {
             style: AppTextStyles.bodyMedium.copyWith(height: 1.65),
           ),
           const SizedBox(height: 32),
-
-          // Email form
           Form(
             key: formKey,
             child: AuthTextField(
@@ -184,8 +180,7 @@ class _InputView extends StatelessWidget {
                 if (v == null || v.trim().isEmpty) {
                   return 'Veuillez entrer votre adresse e-mail';
                 }
-                final emailRegex =
-                    RegExp(r'^[\w-.]+@([\w-]+\.)+[\w]{2,4}$');
+                final emailRegex = RegExp(r'^[\w-.]+@([\w-]+\.)+[\w]{2,4}$');
                 if (!emailRegex.hasMatch(v.trim())) {
                   return 'Adresse e-mail invalide';
                 }
@@ -194,16 +189,12 @@ class _InputView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 28),
-
-          // Send link button
           AuthGradientButton(
             label: 'Envoyer le lien',
             isLoading: isLoading,
             onPressed: isLoading ? null : onSend,
           ),
           const SizedBox(height: 24),
-
-          // Back to login link
           Center(
             child: GestureDetector(
               onTap: onBackToLogin,
@@ -282,8 +273,6 @@ class _SuccessViewState extends State<_SuccessView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 20),
-
-          // Animated checkmark
           Center(
             child: ScaleTransition(
               scale: _checkScale,
@@ -310,8 +299,6 @@ class _SuccessViewState extends State<_SuccessView>
             ),
           ),
           const SizedBox(height: 36),
-
-          // Heading
           Text('E-mail envoyé !', style: AppTextStyles.headlineLarge),
           const SizedBox(height: 12),
           RichText(
@@ -322,10 +309,7 @@ class _SuccessViewState extends State<_SuccessView>
                 height: 1.65,
               ),
               children: [
-                const TextSpan(
-                  text:
-                      'Un lien de réinitialisation a été envoyé à ',
-                ),
+                const TextSpan(text: 'Un lien de réinitialisation a été envoyé à '),
                 TextSpan(
                   text: widget.email,
                   style: GoogleFonts.inter(
@@ -334,23 +318,16 @@ class _SuccessViewState extends State<_SuccessView>
                     color: AppColors.textPrimary,
                   ),
                 ),
-                const TextSpan(
-                  text:
-                      '. Vérifiez votre boîte de réception et vos spams.',
-                ),
+                const TextSpan(text: '. Vérifiez votre boîte de réception et vos spams.'),
               ],
             ),
           ),
           const SizedBox(height: 40),
-
-          // Back to login button
           AuthGradientButton(
             label: 'Retour à la connexion',
             onPressed: widget.onBackToLogin,
           ),
           const SizedBox(height: 24),
-
-          // Resend link
           Center(
             child: GestureDetector(
               onTap: widget.onResend,

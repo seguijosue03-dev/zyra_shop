@@ -1,16 +1,19 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zyra_shop/features/auth/providers/auth_providers.dart';
+import 'package:zyra_shop/features/home/presentation/home.dart';
 import 'login_screen.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fadeCtrl;
   late final Animation<double> _fadeAnimation;
@@ -27,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _fadeCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000), // 800ms to 1200ms
+      duration: const Duration(milliseconds: 1000),
     );
     _fadeAnimation = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeIn);
 
@@ -35,14 +38,35 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _playSequence() async {
-    // Start fade-in
     _fadeCtrl.forward();
-    
-    // Wait for fade-in + hold duration
     await Future.delayed(const Duration(milliseconds: 2500));
-    
     if (!mounted) return;
-    _navigateToLogin();
+    await _checkSessionAndNavigate();
+  }
+
+  Future<void> _checkSessionAndNavigate() async {
+    final user = await ref.read(currentUserProvider.future);
+
+    if (!mounted) return;
+
+    if (user != null) {
+      _navigateToHome();
+    } else {
+      _navigateToLogin();
+    }
+  }
+
+  void _navigateToHome() {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 600),
+        pageBuilder: (ctx, animation, _) => const HomeNavigationWrapper(),
+        transitionsBuilder: (ctx, animation, _, child) => FadeTransition(
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+          child: child,
+        ),
+      ),
+    );
   }
 
   void _navigateToLogin() {
@@ -67,13 +91,13 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Pure black #000000
+      backgroundColor: Colors.black,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: Image.asset(
             'assets/images/zyra_splash_logo.png',
-            fit: BoxFit.contain, // Keep proportions, do not crop
+            fit: BoxFit.contain,
           ),
         ),
       ),

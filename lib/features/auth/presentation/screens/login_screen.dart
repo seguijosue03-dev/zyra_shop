@@ -4,6 +4,7 @@ import 'package:zyra_shop/core/theme/app_colors.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import 'package:zyra_shop/features/home/presentation/home.dart';
+import 'package:zyra_shop/features/admin/presentation/screens/admin_dashboard_wrapper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,12 +34,19 @@ class _LoginScreenState extends State<LoginScreen> {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1)); // Faster mock
     if (!mounted) return;
     setState(() => _isLoading = false);
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const HomeNavigationWrapper()),
-    );
+
+    if (_emailCtrl.text.trim().toLowerCase() == 'admin@zyra.com') {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const AdminDashboardWrapper()),
+      );
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeNavigationWrapper()),
+      );
+    }
   }
 
   void _goToRegister() {

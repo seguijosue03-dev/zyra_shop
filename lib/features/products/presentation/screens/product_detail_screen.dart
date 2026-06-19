@@ -16,8 +16,9 @@ import '../widgets/quantity_selector.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
+  final String heroTagPrefix;
 
-  const ProductDetailScreen({super.key, required this.product});
+  const ProductDetailScreen({super.key, required this.product, this.heroTagPrefix = ''});
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -39,6 +40,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             slivers: [
               SliverToBoxAdapter(
                 child: ProductGallery(
+                  productId: '${widget.heroTagPrefix}${widget.product.id}',
                   images: [
                     widget.product.imageUrl,
                     // Mock extra images

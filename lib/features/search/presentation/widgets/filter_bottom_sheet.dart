@@ -66,7 +66,7 @@ class FilterBottomSheet extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   _buildSectionTitle('Prix'),
-                  _buildWrapOptions(['0-1000 €', '1000-3000 €', '3000+ €'], '0-1000 €'),
+                  _buildWrapOptions(['0-10 000 FCFA', '10 000-50 000 FCFA', '50 000+ FCFA'], '0-10 000 FCFA'),
                   const SizedBox(height: 24),
 
                   _buildSectionTitle('Taille'),

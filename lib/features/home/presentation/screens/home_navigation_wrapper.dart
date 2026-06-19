@@ -10,6 +10,15 @@ import 'home_feed_view.dart';
 import 'package:zyra_shop/features/checkout/presentation/screens/checkout_address_screen.dart' as zyra_checkout;
 import 'package:zyra_shop/features/orders/presentation/screens/orders_list_screen.dart' as zyra_orders;
 import 'package:zyra_shop/features/search/presentation/screens/search_screen.dart' as zyra_search;
+import 'package:zyra_shop/features/profile/presentation/screens/edit_profile_screen.dart';
+import 'package:zyra_shop/features/profile/presentation/screens/payment_methods_screen.dart';
+import 'package:zyra_shop/features/profile/presentation/screens/settings_screen.dart';
+import 'package:zyra_shop/features/seller/presentation/state/mock_seller_state.dart';
+import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller_registration_screen.dart';
+import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller_pending_approval_screen.dart';
+import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller_contract_screen.dart';
+import 'package:zyra_shop/features/seller/presentation/screens/dashboard/seller_dashboard_wrapper.dart';
+import 'package:zyra_shop/shared/widgets/empty_state_widget.dart';
 
 /// Manages tab switching, shared favorite items state, mock cart items state, and full French sub-views.
 class HomeNavigationWrapper extends StatefulWidget {
@@ -600,68 +609,12 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
             ),
           ),
           body: cartItems.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.08),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.shopping_bag_outlined,
-                            size: 56,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Votre panier est vide',
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Découvrez nos produits et ajoutez-les à votre panier.',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: 200,
-                          height: 48,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                            onPressed: () => setState(() => _currentIndex = 0),
-                            child: Text(
-                              'Faire mes achats',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+              ? EmptyStateWidget(
+                  title: 'Votre panier est vide',
+                  message: 'Découvrez nos produits et ajoutez-les à votre panier.',
+                  icon: Icons.shopping_bag_outlined,
+                  actionLabel: 'Faire mes achats',
+                  onActionPressed: () => setState(() => _currentIndex = 0),
                 )
               : Column(
                   children: [
@@ -806,7 +759,7 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
                                       ),
                                     ),
                                     Text(
-                                      '${selectedTotal.toStringAsFixed(2)} €',
+                                      '${selectedTotal.toStringAsFixed(0)} FCFA',
                                       style: GoogleFonts.inter(
                                         fontSize: 20,
                                         fontWeight: FontWeight.w900,
@@ -1165,12 +1118,9 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
                       width: 110,
                       height: 110,
                       decoration: BoxDecoration(
+                        color: Colors.white,
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 4),
-                        image: const DecorationImage(
-                          image: NetworkImage('https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200'),
-                          fit: BoxFit.cover,
-                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.1),
@@ -1179,6 +1129,7 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
                           ),
                         ],
                       ),
+                      child: Icon(Icons.person, size: 60, color: Colors.grey.shade300),
                     ),
                     Container(
                       padding: const EdgeInsets.all(6),
@@ -1194,9 +1145,9 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text('Sophie Martin', style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87)),
+                Text('Mon Profil', style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87)),
                 const SizedBox(height: 4),
-                Text('sophie.martin@example.com', style: GoogleFonts.inter(fontSize: 13, color: Colors.grey.shade600)),
+                Text('Bienvenue sur ZYRA', style: GoogleFonts.inter(fontSize: 13, color: Colors.grey.shade600)),
                 const SizedBox(height: 40),
                 
                 // My Orders Section
@@ -1264,15 +1215,37 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
                     children: [
-                      _buildProfileListTile(Icons.person_outline, 'Modifier le profil', () {}),
+                      _buildProfileListTile(Icons.person_outline, 'Modifier le profil', () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()));
+                      }),
                       _buildProfileListTile(Icons.location_on_outlined, 'Adresses de livraison', () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => const zyra_checkout.CheckoutAddressScreen()),
                         );
                       }),
-                      _buildProfileListTile(Icons.payment_outlined, 'Modes de paiement', () {}),
-                      _buildProfileListTile(Icons.settings_outlined, 'Paramètres', () {}),
+                      _buildProfileListTile(Icons.payment_outlined, 'Modes de paiement', () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentMethodsScreen()));
+                      }),
+                      _buildProfileListTile(Icons.settings_outlined, 'Paramètres', () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+                      }),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Divider(),
+                      ),
+                      _buildProfileListTile(Icons.storefront_outlined, 'Espace Vendeur', () {
+                        final status = MockSellerState().status;
+                        if (status == SellerStatus.none) {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerRegistrationScreen()));
+                        } else if (status == SellerStatus.pending) {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerPendingApprovalScreen()));
+                        } else if (status == SellerStatus.contractRequired) {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerContractScreen()));
+                        } else {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerDashboardWrapper()));
+                        }
+                      }, iconColor: const Color(0xFFFF4B72)),
                     ],
                   ),
                 ),
@@ -1347,7 +1320,7 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
     );
   }
 
-  Widget _buildProfileListTile(IconData icon, String title, VoidCallback onTap) {
+  Widget _buildProfileListTile(IconData icon, String title, VoidCallback onTap, {Color? iconColor}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1355,7 +1328,7 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
         padding: const EdgeInsets.symmetric(vertical: 18),
         child: Row(
           children: [
-            Icon(icon, color: Colors.grey.shade500, size: 24),
+            Icon(icon, color: iconColor ?? Colors.grey.shade500, size: 24),
             const SizedBox(width: 20),
             Expanded(
               child: Text(title, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),

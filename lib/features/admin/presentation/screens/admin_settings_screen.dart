@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/features/admin/presentation/state/mock_settings_state.dart';
+import 'package:zyra_shop/core/services/auth_service.dart';
+import 'package:zyra_shop/features/auth/presentation/screens/login_screen.dart';
 
 class AdminSettingsScreen extends StatefulWidget {
   const AdminSettingsScreen({super.key});
@@ -376,7 +378,16 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
-            onPressed: () {},
+            onPressed: () async {
+              // TODO: Intégration Backend - Déconnexion admin
+              await AuthService().logout();
+
+              if (!context.mounted) return;
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
+            },
             icon: const Icon(Icons.logout, color: Colors.redAccent),
             label: Text('Se déconnecter', style: GoogleFonts.inter(color: Colors.redAccent, fontWeight: FontWeight.w600)),
             style: OutlinedButton.styleFrom(

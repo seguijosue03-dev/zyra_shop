@@ -463,16 +463,6 @@ class _HomeFeedViewState extends State<HomeFeedView> {
               ),
             ),
             const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Row(
-                children: [
-                  const Icon(Icons.logout, color: Colors.grey, size: 20),
-                  const SizedBox(width: 12),
-                  Text('Se déconnecter', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
-                ],
-              ),
-            ),
           ],
         ),
       ),

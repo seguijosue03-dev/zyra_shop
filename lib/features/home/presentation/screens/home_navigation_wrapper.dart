@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
+import 'package:zyra_shop/core/services/auth_service.dart';
+import 'package:zyra_shop/features/auth/presentation/screens/login_screen.dart';
 import 'package:zyra_shop/core/theme/app_text_styles.dart';
 import 'package:zyra_shop/core/state/app_state.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
@@ -1254,7 +1256,11 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
                 
                 // Logout
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
+                    // TODO: Intégration Backend - Le backend doit s'assurer que la méthode logout() supprime la session.
+                    await AuthService().logout();
+
+                    if (!context.mounted) return;
                     Navigator.of(context).pushAndRemoveUntil(
                       PageRouteBuilder(
                         transitionDuration: const Duration(milliseconds: 600),

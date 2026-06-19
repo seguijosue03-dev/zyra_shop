@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
+import 'package:zyra_shop/features/auth/providers/auth_providers.dart';
 import 'package:zyra_shop/features/home/presentation/home.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _whatsappCtrl = TextEditingController();
-  
+
   final _nameFocus = FocusNode();
   final _passwordFocus = FocusNode();
   final _emailFocus = FocusNode();
   final _phoneFocus = FocusNode();
   final _whatsappFocus = FocusNode();
-  
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -44,15 +44,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _onRegister() async {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
-    
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
+
+    await ref.read(authNotifierProvider.notifier).register(
+      email: _emailCtrl.text.trim(),
+      password: _passwordCtrl.text.trim(),
+      fullName: _nameCtrl.text.trim(),
+    );
+
     if (!mounted) return;
-    setState(() => _isLoading = false);
-    
+
+    final authState = ref.read(authNotifierProvider);
+
+    if (authState.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authState.errorMessage!),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    // Register successful → navigate to home
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const HomeNavigationWrapper()),
-      (route) => false,
+          (route) => false,
     );
   }
 
@@ -110,6 +126,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+    final isLoading = authState.isLoading;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return GestureDetector(
@@ -160,11 +178,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             SafeArea(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(top: 140), // Safely below top-left blob
+                padding: const EdgeInsets.only(top: 140),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title and Logo
                     Center(
                       child: Column(
                         children: [
@@ -184,11 +201,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 50),
 
-                    // Perfect Form Container
                     Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        // White Box
                         Container(
                           width: screenWidth * 0.82,
                           decoration: BoxDecoration(
@@ -247,7 +262,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 const Divider(height: 1, color: Color(0xFFF0F0F0), indent: 24, endIndent: 24),
                                 _buildTextField(
                                   controller: _whatsappCtrl,
-                                  icon: Icons.chat_outlined, // Fallback icon for WhatsApp
+                                  icon: Icons.chat_outlined,
                                   hint: 'Numéro WhatsApp',
                                   focusNode: _whatsappFocus,
                                   keyboardType: TextInputType.phone,
@@ -257,9 +272,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
 
-                        // Action Button Perfectly Overlapping Right Edge
                         Positioned(
-                          right: -28, // Half of button width
+                          right: -28,
                           top: 0,
                           bottom: 0,
                           child: Center(
@@ -287,7 +301,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     ),
                                   ],
                                 ),
-                                child: _isLoading
+                                child: isLoading
                                     ? const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)))
                                     : const Icon(Icons.check, color: Colors.white, size: 28),
                               ),
@@ -302,7 +316,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
 
-            // ── Floating Login Pill (Layer 2 - Right Edge) ──
+            // ── Floating Login Pill ──
             Positioned(
               top: 50,
               right: 0,

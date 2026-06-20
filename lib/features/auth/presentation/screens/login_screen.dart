@@ -63,8 +63,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const RegisterScreen(),
-        transitionsBuilder: (_, a, __, c) => FadeTransition(opacity: a, child: c),
+        pageBuilder: (_, _, _) => const RegisterScreen(),
+        transitionsBuilder: (_, a, _, c) => FadeTransition(opacity: a, child: c),
       ),
     );
   }

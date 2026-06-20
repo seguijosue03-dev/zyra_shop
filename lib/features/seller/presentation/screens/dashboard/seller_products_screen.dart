@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/features/seller/presentation/state/mock_dashboard_state.dart';
 import 'seller_product_form_screen.dart';
-import 'seller_product_form_screen.dart';
 
 class SellerProductsScreen extends StatelessWidget {
   const SellerProductsScreen({super.key});

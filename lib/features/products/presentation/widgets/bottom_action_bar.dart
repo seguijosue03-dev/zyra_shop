@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
 import 'package:zyra_shop/core/theme/app_shadows.dart';
-import 'package:zyra_shop/features/home/presentation/widgets/mock_products.dart';
+import 'package:zyra_shop/features/products/domain/entities/product.dart';
 import 'package:zyra_shop/core/state/app_state.dart';
 import 'package:zyra_shop/features/checkout/presentation/screens/checkout_address_screen.dart' as zyra_checkout;
 

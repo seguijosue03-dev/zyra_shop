@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:zyra_shop/core/theme/app_colors.dart';
 import 'package:zyra_shop/features/seller/presentation/state/mock_seller_state.dart';
 import 'seller_welcome_screen.dart';
 

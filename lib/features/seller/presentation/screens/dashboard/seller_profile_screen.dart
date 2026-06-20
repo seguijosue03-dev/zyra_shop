@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:zyra_shop/core/theme/app_colors.dart';
 
 class SellerProfileScreen extends StatelessWidget {
   const SellerProfileScreen({super.key});

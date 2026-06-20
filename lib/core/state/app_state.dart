@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:zyra_shop/features/home/presentation/widgets/mock_products.dart';
+import 'package:zyra_shop/features/products/domain/entities/product.dart';
 
 class CartItemMock {
   final Product product;

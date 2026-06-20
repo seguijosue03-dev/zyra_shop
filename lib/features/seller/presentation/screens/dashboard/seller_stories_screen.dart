@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:zyra_shop/features/home/presentation/widgets/mock_products.dart';
+import 'package:zyra_shop/features/seller/domain/entities/seller_story.dart';
 import 'package:zyra_shop/features/seller/presentation/state/mock_dashboard_state.dart';
 import 'package:zyra_shop/features/seller/presentation/screens/dashboard/seller_story_details_screen.dart';
 
@@ -80,7 +80,7 @@ class SellerStoriesScreen extends StatelessWidget {
                 const SizedBox(height: 32),
                 Text('Stories publiées', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
                 const SizedBox(height: 16),
-                ...stories.map((story) => _buildStoryCard(context, story)).toList(),
+                ...stories.map((story) => _buildStoryCard(context, story)),
                 const SizedBox(height: 80),
               ],
             ),

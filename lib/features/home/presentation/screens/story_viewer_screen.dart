@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:zyra_shop/features/home/presentation/widgets/mock_products.dart';
+import 'package:zyra_shop/features/products/domain/entities/product.dart';
+import 'package:zyra_shop/features/seller/domain/entities/seller_story.dart';
 import 'dart:async';
 
 class StoryViewerScreen extends StatefulWidget {

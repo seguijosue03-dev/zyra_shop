@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/features/messaging/domain/entities/message_entity.dart';
-import 'package:zyra_shop/features/products/presentation/screens/product_detail_screen.dart';
 
 class MessageBubble extends StatelessWidget {
   final MessageEntity message;

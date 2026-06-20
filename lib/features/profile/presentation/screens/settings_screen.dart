@@ -69,7 +69,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onChanged: onChanged,
       title: Text(title, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
       subtitle: Text(subtitle, style: GoogleFonts.inter(fontSize: 13, color: Colors.grey.shade600)),
-      activeColor: const Color(0xFFFF4B72),
+      activeThumbColor: const Color(0xFFFF4B72),
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
     );
   }

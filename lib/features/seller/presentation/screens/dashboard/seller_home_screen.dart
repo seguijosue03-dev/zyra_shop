@@ -210,7 +210,7 @@ class SellerHomeScreen extends StatelessWidget {
                 ),
               )
             else
-              ...state.orders.take(3).map((o) => _buildRecentOrderMock(o['id'], o['status'], o['statusColor'])).toList(),
+              ...state.orders.take(3).map((o) => _buildRecentOrderMock(o['id'], o['status'], o['statusColor'])),
             const SizedBox(height: 48),
           ],
         ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
-import 'package:zyra_shop/features/cart/domain/entities/cart_item.dart';
 
 class OrderSummaryItem extends StatelessWidget {
   final String name;

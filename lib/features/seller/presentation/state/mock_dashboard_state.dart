@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:zyra_shop/features/home/presentation/widgets/mock_products.dart';
+import 'package:zyra_shop/features/seller/domain/entities/seller_story.dart';
 
 class MockDashboardState extends ChangeNotifier {
   static final MockDashboardState _instance = MockDashboardState._internal();

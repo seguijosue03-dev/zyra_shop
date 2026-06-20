@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:zyra_shop/core/theme/app_colors.dart';
 
 // Import all screens (we will create them next)
 import 'seller_home_screen.dart';

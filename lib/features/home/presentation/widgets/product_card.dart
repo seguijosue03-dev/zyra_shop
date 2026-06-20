@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
 import 'package:zyra_shop/core/theme/app_shadows.dart';
-import 'mock_products.dart';
+import 'package:zyra_shop/features/products/domain/entities/product.dart';
 
 /// ZYRA Shop — Premium Product Card
 /// Redesigned: shadow-only depth, full-width CTA, strikethrough pricing, no creator row.

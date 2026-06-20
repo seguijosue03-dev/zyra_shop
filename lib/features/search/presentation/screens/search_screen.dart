@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
 import 'package:zyra_shop/features/home/presentation/widgets/mock_products.dart';
+import 'package:zyra_shop/features/products/domain/entities/product.dart';
 import '../widgets/search_bar_header.dart';
 import '../widgets/search_history_section.dart';
 import '../widgets/trending_searches_section.dart';
@@ -20,7 +21,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
   
-  List<String> _history = [
+  final List<String> _history = [
     'Robe noire',
     'Jean oversize',
     'Hoodie femme',

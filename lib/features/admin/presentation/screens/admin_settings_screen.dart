@@ -444,7 +444,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: Colors.black87,
+          activeThumbColor: Colors.black87,
         ),
       ],
     );

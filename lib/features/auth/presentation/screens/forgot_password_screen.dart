@@ -7,36 +7,50 @@ import 'package:zyra_shop/features/auth/providers/auth_providers.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/auth_gradient_button.dart';
 
+// ── Reset mode ─────────────────────────────────────────────────────────────────
+enum _ResetMode { email, phone }
+
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  ConsumerState<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
 }
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
-  bool _emailSent = false;
+  final _phoneCtrl = TextEditingController();
+  bool _sent = false;
+  _ResetMode _mode = _ResetMode.email;
 
   @override
   void dispose() {
     _emailCtrl.dispose();
+    _phoneCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _onSendLink() async {
+  Future<void> _onSend() async {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
 
-    await ref.read(authNotifierProvider.notifier).forgotPassword(
-      email: _emailCtrl.text.trim(),
-    );
+    if (_mode == _ResetMode.email) {
+      await ref.read(authNotifierProvider.notifier).forgotPassword(
+            email: _emailCtrl.text.trim(),
+          );
+    } else {
+      String phone = _phoneCtrl.text.trim();
+      if (!phone.startsWith('+')) phone = '+$phone';
+      await ref.read(authNotifierProvider.notifier).forgotPasswordWithPhone(
+            phone: phone,
+          );
+    }
 
     if (!mounted) return;
 
     final authState = ref.read(authNotifierProvider);
-
     if (authState.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -47,7 +61,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       return;
     }
 
-    setState(() => _emailSent = true);
+    setState(() => _sent = true);
+  }
+
+  void _switchMode(_ResetMode mode) {
+    if (_mode == mode) return;
+    setState(() {
+      _mode = mode;
+      _sent = false;
+    });
+    _formKey.currentState?.reset();
   }
 
   @override
@@ -84,21 +107,27 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       child: child,
                     ),
                   ),
-                  child: _emailSent
+                  child: _sent
                       ? _SuccessView(
-                    key: const ValueKey('success'),
-                    email: _emailCtrl.text.trim(),
-                    onBackToLogin: () => Navigator.pop(context),
-                    onResend: () => setState(() => _emailSent = false),
-                  )
+                          key: ValueKey('success_${_mode.name}'),
+                          identifier: _mode == _ResetMode.email
+                              ? _emailCtrl.text.trim()
+                              : _phoneCtrl.text.trim(),
+                          isPhone: _mode == _ResetMode.phone,
+                          onBackToLogin: () => Navigator.pop(context),
+                          onResend: () => setState(() => _sent = false),
+                        )
                       : _InputView(
-                    key: const ValueKey('input'),
-                    formKey: _formKey,
-                    emailCtrl: _emailCtrl,
-                    isLoading: authState.isLoading,
-                    onSend: _onSendLink,
-                    onBackToLogin: () => Navigator.pop(context),
-                  ),
+                          key: ValueKey('input_${_mode.name}'),
+                          formKey: _formKey,
+                          emailCtrl: _emailCtrl,
+                          phoneCtrl: _phoneCtrl,
+                          isLoading: authState.isLoading,
+                          mode: _mode,
+                          onSwitchMode: _switchMode,
+                          onSend: _onSend,
+                          onBackToLogin: () => Navigator.pop(context),
+                        ),
                 ),
               ),
             ],
@@ -114,7 +143,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 class _InputView extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController emailCtrl;
+  final TextEditingController phoneCtrl;
   final bool isLoading;
+  final _ResetMode mode;
+  final void Function(_ResetMode) onSwitchMode;
   final VoidCallback onSend;
   final VoidCallback onBackToLogin;
 
@@ -122,7 +154,10 @@ class _InputView extends StatelessWidget {
     super.key,
     required this.formKey,
     required this.emailCtrl,
+    required this.phoneCtrl,
     required this.isLoading,
+    required this.mode,
+    required this.onSwitchMode,
     required this.onSend,
     required this.onBackToLogin,
   });
@@ -136,6 +171,7 @@ class _InputView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 20),
+          // ── Icon ──
           Center(
             child: Container(
               width: 96,
@@ -162,35 +198,57 @@ class _InputView extends StatelessWidget {
           Text('Mot de passe oublié ?', style: AppTextStyles.headlineLarge),
           const SizedBox(height: 12),
           Text(
-            'Pas de panique ! Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.',
+            mode == _ResetMode.email
+                ? 'Pas de panique ! Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.'
+                : 'Entrez votre numéro de téléphone. Vous recevrez un code OTP par SMS pour réinitialiser votre mot de passe.',
             style: AppTextStyles.bodyMedium.copyWith(height: 1.65),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
+
+          // ── Toggle Email / Phone ──
+          _ModeToggle(current: mode, onSwitch: onSwitchMode),
+          const SizedBox(height: 24),
+
+          // ── Form field ──
           Form(
             key: formKey,
-            child: AuthTextField(
-              label: 'Adresse e-mail',
-              hint: 'exemple@email.com',
-              controller: emailCtrl,
-              keyboardType: TextInputType.emailAddress,
-              prefixIcon: Icons.email_outlined,
-              textInputAction: TextInputAction.done,
-              onEditingComplete: onSend,
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) {
-                  return 'Veuillez entrer votre adresse e-mail';
-                }
-                final emailRegex = RegExp(r'^[\w-.]+@([\w-]+\.)+[\w]{2,4}$');
-                if (!emailRegex.hasMatch(v.trim())) {
-                  return 'Adresse e-mail invalide';
-                }
-                return null;
-              },
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              switchInCurve: Curves.easeOutCubic,
+              child: mode == _ResetMode.email
+                  ? AuthTextField(
+                      key: const ValueKey('email_fp'),
+                      label: 'Adresse e-mail',
+                      hint: 'exemple@email.com',
+                      controller: emailCtrl,
+                      keyboardType: TextInputType.emailAddress,
+                      prefixIcon: Icons.email_outlined,
+                      textInputAction: TextInputAction.done,
+                      onEditingComplete: onSend,
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return 'Veuillez entrer votre adresse e-mail';
+                        }
+                        final emailRegex =
+                            RegExp(r'^[\w-.]+@([\w-]+\.)+[\w]{2,4}$');
+                        if (!emailRegex.hasMatch(v.trim())) {
+                          return 'Adresse e-mail invalide';
+                        }
+                        return null;
+                      },
+                    )
+                  : _PhoneField(
+                      key: const ValueKey('phone_fp'),
+                      controller: phoneCtrl,
+                      onEditingComplete: onSend,
+                    ),
             ),
           ),
           const SizedBox(height: 28),
           AuthGradientButton(
-            label: 'Envoyer le lien',
+            label: mode == _ResetMode.email
+                ? 'Envoyer le lien'
+                : 'Envoyer le code SMS',
             isLoading: isLoading,
             onPressed: isLoading ? null : onSend,
           ),
@@ -215,16 +273,166 @@ class _InputView extends StatelessWidget {
   }
 }
 
+// ── Mode toggle widget ─────────────────────────────────────────────────────────
+
+class _ModeToggle extends StatelessWidget {
+  final _ResetMode current;
+  final void Function(_ResetMode) onSwitch;
+
+  const _ModeToggle({required this.current, required this.onSwitch});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 44,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F0F0),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Stack(
+        children: [
+          // Sliding pill
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 240),
+            curve: Curves.easeInOut,
+            alignment: current == _ResetMode.email
+                ? Alignment.centerLeft
+                : Alignment.centerRight,
+            child: FractionallySizedBox(
+              widthFactor: 0.5,
+              child: Container(
+                margin: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(9),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Labels
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => onSwitch(_ResetMode.email),
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.email_outlined,
+                          size: 16,
+                          color: current == _ResetMode.email
+                              ? AppColors.primary
+                              : Colors.black45,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'E-mail',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: current == _ResetMode.email
+                                ? AppColors.primary
+                                : Colors.black45,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => onSwitch(_ResetMode.phone),
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.phone_outlined,
+                          size: 16,
+                          color: current == _ResetMode.phone
+                              ? AppColors.primary
+                              : Colors.black45,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Téléphone',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: current == _ResetMode.phone
+                                ? AppColors.primary
+                                : Colors.black45,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Phone field ───────────────────────────────────────────────────────────────
+
+class _PhoneField extends StatelessWidget {
+  final TextEditingController controller;
+  final VoidCallback? onEditingComplete;
+
+  const _PhoneField({super.key, required this.controller, this.onEditingComplete});
+
+  @override
+  Widget build(BuildContext context) {
+    return AuthTextField(
+      label: 'Numéro de téléphone',
+      hint: '+243 XXX XXX XXX',
+      controller: controller,
+      keyboardType: TextInputType.phone,
+      prefixIcon: Icons.phone_outlined,
+      textInputAction: TextInputAction.done,
+      onEditingComplete: onEditingComplete,
+      validator: (v) {
+        if (v == null || v.trim().isEmpty) {
+          return 'Veuillez entrer votre numéro de téléphone';
+        }
+        final digits = v.replaceAll(RegExp(r'[^\d]'), '');
+        if (digits.length < 8) {
+          return 'Numéro de téléphone invalide';
+        }
+        return null;
+      },
+    );
+  }
+}
+
 // ── Success view ──────────────────────────────────────────────────────────────
 
 class _SuccessView extends StatefulWidget {
-  final String email;
+  final String identifier;
+  final bool isPhone;
   final VoidCallback onBackToLogin;
   final VoidCallback onResend;
 
   const _SuccessView({
     super.key,
-    required this.email,
+    required this.identifier,
+    required this.isPhone,
     required this.onBackToLogin,
     required this.onResend,
   });
@@ -289,8 +497,10 @@ class _SuccessViewState extends State<_SuccessView>
                       width: 1.5,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.mark_email_read_outlined,
+                  child: Icon(
+                    widget.isPhone
+                        ? Icons.sms_outlined
+                        : Icons.mark_email_read_outlined,
                     size: 44,
                     color: AppColors.success,
                   ),
@@ -299,7 +509,10 @@ class _SuccessViewState extends State<_SuccessView>
             ),
           ),
           const SizedBox(height: 36),
-          Text('E-mail envoyé !', style: AppTextStyles.headlineLarge),
+          Text(
+            widget.isPhone ? 'SMS envoyé !' : 'E-mail envoyé !',
+            style: AppTextStyles.headlineLarge,
+          ),
           const SizedBox(height: 12),
           RichText(
             text: TextSpan(
@@ -309,16 +522,24 @@ class _SuccessViewState extends State<_SuccessView>
                 height: 1.65,
               ),
               children: [
-                const TextSpan(text: 'Un lien de réinitialisation a été envoyé à '),
                 TextSpan(
-                  text: widget.email,
+                  text: widget.isPhone
+                      ? 'Un code OTP a été envoyé au numéro '
+                      : 'Un lien de réinitialisation a été envoyé à ',
+                ),
+                TextSpan(
+                  text: widget.identifier,
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
                 ),
-                const TextSpan(text: '. Vérifiez votre boîte de réception et vos spams.'),
+                TextSpan(
+                  text: widget.isPhone
+                      ? '. Vérifiez vos SMS.'
+                      : '. Vérifiez votre boîte de réception et vos spams.',
+                ),
               ],
             ),
           ),
@@ -338,7 +559,11 @@ class _SuccessViewState extends State<_SuccessView>
                     color: AppColors.textSecondary,
                   ),
                   children: [
-                    const TextSpan(text: "Vous n'avez pas reçu l'e-mail ? "),
+                    TextSpan(
+                      text: widget.isPhone
+                          ? "Vous n'avez pas reçu le SMS ? "
+                          : "Vous n'avez pas reçu l'e-mail ? ",
+                    ),
                     TextSpan(
                       text: 'Renvoyer',
                       style: GoogleFonts.inter(

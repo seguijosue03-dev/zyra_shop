@@ -91,6 +91,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> loginWithPhone({
+    required String phone,
+    required String password,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      await _repository.loginWithPhone(phone: phone, password: password);
+      state = state.copyWith(isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
   Future<void> logout() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
@@ -108,6 +124,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       await _repository.forgotPassword(email: email);
+      state = state.copyWith(isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  Future<void> forgotPasswordWithPhone({required String phone}) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      await _repository.forgotPasswordWithPhone(phone: phone);
       state = state.copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(

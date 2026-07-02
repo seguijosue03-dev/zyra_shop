@@ -12,9 +12,13 @@ abstract class AuthRepository {
     required String password,
   });
 
+  Future<void> loginWithPhone({required String phone, required String password});
+
   Future<void> logout();
 
   Future<void> forgotPassword({required String email});
+
+  Future<void> forgotPasswordWithPhone({required String phone});
 
   Future<void> resetPassword({required String newPassword});
 

@@ -63,8 +63,29 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> loginWithPhone({
+    required String phone,
+    required String password,
+  }) async {
+    // Supabase phone login: sign in with phone + password
+    final response = await supabase.auth.signInWithPassword(
+      phone: phone,
+      password: password,
+    );
+    if (response.user == null) {
+      throw Exception('Connexion échouée');
+    }
+  }
+
+  @override
   Future<void> forgotPassword({required String email}) async {
     await supabase.auth.resetPasswordForEmail(email);
+  }
+
+  @override
+  Future<void> forgotPasswordWithPhone({required String phone}) async {
+    // Send OTP to phone number for password reset
+    await supabase.auth.signInWithOtp(phone: phone);
   }
 
   @override

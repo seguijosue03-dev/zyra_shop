@@ -14,7 +14,7 @@ import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller
 import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller_contract_screen.dart';
 import 'package:zyra_shop/features/seller/presentation/screens/dashboard/seller_dashboard_wrapper.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final VoidCallback onNavigateHome;
   final VoidCallback onNavigateFavorites;
 
@@ -23,6 +23,25 @@ class ProfileScreen extends StatelessWidget {
     required this.onNavigateHome,
     required this.onNavigateFavorites,
   });
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String? _profileImageUrl;
+  bool _isUploading = false;
+
+  void _simulateAvatarUpload() async {
+    setState(() => _isUploading = true);
+    await Future.delayed(const Duration(seconds: 1));
+    if (!mounted) return;
+    setState(() {
+      _isUploading = false;
+      _profileImageUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200';
+    });
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo de profil mise à jour avec succès !'), backgroundColor: Colors.green));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +54,7 @@ class ProfileScreen extends StatelessWidget {
         title: Text('Profil', style: GoogleFonts.inter(fontSize: 16, color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black54, size: 20),
-          onPressed: onNavigateHome,
+          onPressed: widget.onNavigateHome,
         ),
       ),
       body: SingleChildScrollView(
@@ -80,32 +99,38 @@ class ProfileScreen extends StatelessWidget {
                         border: Border.all(color: Colors.white, width: 4),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
+                            color: Colors.black.withOpacity(0.1),
                             blurRadius: 10,
                             offset: const Offset(0, 5),
                           ),
                         ],
                       ),
-                      child: Icon(Icons.person, size: 60, color: Colors.grey.shade300),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4),
-                        ],
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(55),
+                        child: _isUploading
+                            ? const Center(child: CircularProgressIndicator(color: Color(0xFFFF4B72)))
+                            : _profileImageUrl != null
+                                ? Image.network(_profileImageUrl!, fit: BoxFit.cover)
+                                : Icon(Icons.person, size: 60, color: Colors.grey.shade300),
                       ),
-                      child: const Icon(Icons.camera_alt_outlined, size: 16, color: Colors.grey),
+                    ),
+                    GestureDetector(
+                      onTap: _simulateAvatarUpload,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+                          ],
+                        ),
+                        child: const Icon(Icons.camera_alt_outlined, size: 18, color: Color(0xFFFF4B72)),
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Text('Mon Profil', style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87)),
-                const SizedBox(height: 4),
-                Text('Bienvenue sur ZYRA', style: GoogleFonts.inter(fontSize: 13, color: Colors.grey.shade600)),
-                const SizedBox(height: 40),
+                const SizedBox(height: 120),
                 
                 // My Orders Section
                 Padding(
@@ -153,7 +178,7 @@ class ProfileScreen extends StatelessWidget {
                               Navigator.push(context, MaterialPageRoute(builder: (_) => const zyra_orders.OrdersListScreen()));
                             }),
                             _buildOrderGridItem(Icons.favorite, 'Favoris', const Color(0xFFFF4B72), () {
-                              onNavigateFavorites();
+                              widget.onNavigateFavorites();
                             }),
                             _buildOrderGridItem(Icons.headset_mic, 'Service\nClient', Colors.deepPurple.shade400, () {
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Service Client (Mock)')));

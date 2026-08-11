@@ -46,4 +46,9 @@ class MockDashboardState extends ChangeNotifier {
     stories.insert(0, story);
     notifyListeners();
   }
+
+  void deleteStory(String id) {
+    stories.removeWhere((s) => s.id == id);
+    notifyListeners();
+  }
 }

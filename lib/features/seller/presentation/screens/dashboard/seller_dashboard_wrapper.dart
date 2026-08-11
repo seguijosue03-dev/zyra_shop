@@ -18,13 +18,23 @@ class SellerDashboardWrapper extends StatefulWidget {
 class _SellerDashboardWrapperState extends State<SellerDashboardWrapper> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    SellerHomeScreen(),
-    SellerProductsScreen(),
-    SellerOrdersScreen(),
-    SellerStoriesScreen(),
-    SellerProfileScreen(),
-  ];
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      const SellerHomeScreen(),
+      const SellerProductsScreen(),
+      const SellerOrdersScreen(),
+      const SellerStoriesScreen(),
+      SellerProfileScreen(
+        onNavigateProducts: () {
+          setState(() => _currentIndex = 1);
+        },
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

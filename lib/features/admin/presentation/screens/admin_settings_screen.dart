@@ -200,11 +200,51 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         _buildSettingsCard(
           child: Column(
             children: [
-              _buildActionRow(icon: Icons.language, title: 'Langue par défaut', subtitle: state.defaultLanguage),
+              _buildActionRow(
+                icon: Icons.language, 
+                title: 'Langue par défaut', 
+                subtitle: state.defaultLanguage,
+                onTap: () {
+                  _showEditDialog(
+                    title: 'Langue par défaut',
+                    initialValue: state.defaultLanguage,
+                    label: 'Langue',
+                    onSave: (val) => state.updateSetting(() => state.defaultLanguage = val),
+                  );
+                }
+              ),
               const Divider(height: 32),
-              _buildActionRow(icon: Icons.payments_outlined, title: 'Devise principale', subtitle: state.defaultCurrency),
+              _buildActionRow(
+                icon: Icons.payments_outlined, 
+                title: 'Devise principale', 
+                subtitle: state.defaultCurrency,
+                onTap: () {
+                  _showEditDialog(
+                    title: 'Devise principale',
+                    initialValue: state.defaultCurrency,
+                    label: 'Devise',
+                    onSave: (val) => state.updateSetting(() => state.defaultCurrency = val),
+                  );
+                }
+              ),
               const Divider(height: 32),
-              _buildActionRow(icon: Icons.percent, title: 'Taxe globale (TVA)', subtitle: '${state.defaultTaxRate}%'),
+              _buildActionRow(
+                icon: Icons.percent, 
+                title: 'Taxe globale (TVA)', 
+                subtitle: '${state.defaultTaxRate}%',
+                onTap: () {
+                  _showEditDialog(
+                    title: 'Taxe globale (TVA)',
+                    initialValue: state.defaultTaxRate.toString(),
+                    label: 'TVA (%)',
+                    keyboardType: TextInputType.number,
+                    onSave: (val) {
+                      final parsed = double.tryParse(val.replaceAll(',', '.'));
+                      if (parsed != null) state.updateSetting(() => state.defaultTaxRate = parsed);
+                    },
+                  );
+                }
+              ),
             ],
           ),
         ),
@@ -243,9 +283,41 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         _buildSettingsCard(
           child: Column(
             children: [
-              _buildActionRow(icon: Icons.account_balance_wallet_outlined, title: 'Commission ZYRA globale', subtitle: '${state.globalCommission}% par transaction'),
+              _buildActionRow(
+                icon: Icons.account_balance_wallet_outlined, 
+                title: 'Commission ZYRA globale', 
+                subtitle: '${state.globalCommission}% par transaction',
+                onTap: () {
+                  _showEditDialog(
+                    title: 'Commission globale',
+                    initialValue: state.globalCommission.toString(),
+                    label: 'Commission (%)',
+                    keyboardType: TextInputType.number,
+                    onSave: (val) {
+                      final parsed = double.tryParse(val.replaceAll(',', '.'));
+                      if (parsed != null) state.updateSetting(() => state.globalCommission = parsed);
+                    },
+                  );
+                }
+              ),
               const Divider(height: 32),
-              _buildActionRow(icon: Icons.money, title: 'Frais fixes par transaction', subtitle: '${state.fixedFeePerTransaction} FCFA'),
+              _buildActionRow(
+                icon: Icons.money, 
+                title: 'Frais fixes par transaction', 
+                subtitle: '${state.fixedFeePerTransaction} FCFA',
+                onTap: () {
+                  _showEditDialog(
+                    title: 'Frais fixes par transaction',
+                    initialValue: state.fixedFeePerTransaction.toString(),
+                    label: 'Montant',
+                    keyboardType: TextInputType.number,
+                    onSave: (val) {
+                      final parsed = double.tryParse(val.replaceAll(',', '.'));
+                      if (parsed != null) state.updateSetting(() => state.fixedFeePerTransaction = parsed);
+                    },
+                  );
+                }
+              ),
             ],
           ),
         ),
@@ -270,9 +342,41 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                 onChanged: (val) => state.updateSetting(() => state.autoApproveProducts = val),
               ),
               const Divider(height: 32),
-              _buildActionRow(icon: Icons.image_outlined, title: 'Limite d\'images par produit', subtitle: '${state.maxImagesPerProduct} images max'),
+              _buildActionRow(
+                icon: Icons.image_outlined, 
+                title: 'Limite d\'images par produit', 
+                subtitle: '${state.maxImagesPerProduct} images max',
+                onTap: () {
+                  _showEditDialog(
+                    title: 'Limite d\'images',
+                    initialValue: state.maxImagesPerProduct.toString(),
+                    label: 'Nombre d\'images',
+                    keyboardType: TextInputType.number,
+                    onSave: (val) {
+                      final parsed = int.tryParse(val);
+                      if (parsed != null) state.updateSetting(() => state.maxImagesPerProduct = parsed);
+                    },
+                  );
+                }
+              ),
               const Divider(height: 32),
-              _buildActionRow(icon: Icons.warning_amber_rounded, title: 'Masquage automatique', subtitle: 'Après ${state.reportsBeforeAutoHide} signalements'),
+              _buildActionRow(
+                icon: Icons.warning_amber_rounded, 
+                title: 'Masquage automatique', 
+                subtitle: 'Après ${state.reportsBeforeAutoHide} signalements',
+                onTap: () {
+                  _showEditDialog(
+                    title: 'Signalements requis',
+                    initialValue: state.reportsBeforeAutoHide.toString(),
+                    label: 'Nombre de signalements',
+                    keyboardType: TextInputType.number,
+                    onSave: (val) {
+                      final parsed = int.tryParse(val);
+                      if (parsed != null) state.updateSetting(() => state.reportsBeforeAutoHide = parsed);
+                    },
+                  );
+                }
+              ),
             ],
           ),
         ),
@@ -370,7 +474,17 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                 onChanged: (val) => state.updateSetting(() => state.twoFactorAuth = val),
               ),
               const Divider(height: 32),
-              _buildActionRow(icon: Icons.lock_outline, title: 'Changer le mot de passe', subtitle: 'Dernière modification il y a 3 mois', trailingButton: true),
+              _buildActionRow(
+                icon: Icons.lock_outline, 
+                title: 'Changer le mot de passe', 
+                subtitle: 'Dernière modification il y a 3 mois', 
+                trailingButton: true,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Le changement de mot de passe est géré par le backend')),
+                  );
+                }
+              ),
             ],
           ),
         ),
@@ -402,6 +516,47 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   }
 
   // --- Helper Widgets ---
+
+  Future<void> _showEditDialog({
+    required String title,
+    required String initialValue,
+    required String label,
+    TextInputType keyboardType = TextInputType.text,
+    required ValueChanged<String> onSave,
+  }) async {
+    final controller = TextEditingController(text: initialValue);
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 18)),
+          content: TextField(
+            controller: controller,
+            keyboardType: keyboardType,
+            decoration: InputDecoration(
+              labelText: label,
+              labelStyle: GoogleFonts.inter(fontSize: 14),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Annuler', style: GoogleFonts.inter(color: Colors.grey.shade600)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onSave(controller.text.trim());
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.black87),
+              child: Text('Enregistrer', style: GoogleFonts.inter(color: Colors.white)),
+            ),
+          ],
+        );
+      }
+    );
+  }
 
   Widget _buildSettingsCard({required Widget child}) {
     return Container(
@@ -450,45 +605,66 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     );
   }
 
-  Widget _buildActionRow({required IconData icon, required String title, required String subtitle, bool trailingButton = false}) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: Colors.black87, size: 20),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
-              const SizedBox(height: 2),
-              Text(subtitle, style: GoogleFonts.inter(fontSize: 13, color: Colors.black54)),
-            ],
-          ),
-        ),
-        const SizedBox(width: 16),
-        if (trailingButton)
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black87,
-              elevation: 0,
-              minimumSize: const Size(0, 36),
-              side: BorderSide(color: Colors.black.withOpacity(0.1)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+  Widget _buildActionRow({
+    required IconData icon, 
+    required String title, 
+    required String subtitle, 
+    bool trailingButton = false,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap ?? () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Paramètre non implémenté : $title')),
+        );
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: Colors.black87, size: 20),
             ),
-            child: Text('Modifier', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
-          )
-        else
-          const Icon(Icons.chevron_right, color: Colors.black54),
-      ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
+                  const SizedBox(height: 2),
+                  Text(subtitle, style: GoogleFonts.inter(fontSize: 13, color: Colors.black54)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            if (trailingButton)
+              ElevatedButton(
+                onPressed: onTap ?? () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Action non implémentée : $title')),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black87,
+                  elevation: 0,
+                  minimumSize: const Size(0, 36),
+                  side: BorderSide(color: Colors.black.withOpacity(0.1)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                ),
+                child: Text('Modifier', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+              )
+            else
+              const Icon(Icons.chevron_right, color: Colors.black54),
+          ],
+        ),
+      ),
     );
   }
 }

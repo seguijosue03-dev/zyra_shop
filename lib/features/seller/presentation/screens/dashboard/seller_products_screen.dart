@@ -3,8 +3,91 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/features/seller/presentation/state/mock_dashboard_state.dart';
 import 'seller_product_form_screen.dart';
 
-class SellerProductsScreen extends StatelessWidget {
+class SellerProductsScreen extends StatefulWidget {
   const SellerProductsScreen({super.key});
+
+  @override
+  State<SellerProductsScreen> createState() => _SellerProductsScreenState();
+}
+
+class _SellerProductsScreenState extends State<SellerProductsScreen> {
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _showFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Filtres', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text('Statut', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  ChoiceChip(label: const Text('Tous'), selected: true, onSelected: (_) {}),
+                  ChoiceChip(label: const Text('En stock'), selected: false, onSelected: (_) {}),
+                  ChoiceChip(label: const Text('Rupture'), selected: false, onSelected: (_) {}),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Text('Trier par', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  ChoiceChip(label: const Text('Plus récent'), selected: true, onSelected: (_) {}),
+                  ChoiceChip(label: const Text('Prix croissant'), selected: false, onSelected: (_) {}),
+                  ChoiceChip(label: const Text('Prix décroissant'), selected: false, onSelected: (_) {}),
+                ],
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Filtres appliqués (Mock)')));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black87,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text('Appliquer', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,16 +98,39 @@ class SellerProductsScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: false,
         automaticallyImplyLeading: false,
-        title: Text('Mes Produits', style: GoogleFonts.inter(color: Colors.black87, fontSize: 18, fontWeight: FontWeight.bold)),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Rechercher un produit...',
+                  hintStyle: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade400),
+                  border: InputBorder.none,
+                ),
+                style: GoogleFonts.inter(color: Colors.black87),
+                onChanged: (val) => setState(() => _searchQuery = val),
+              )
+            : Text('Mes Produits', style: GoogleFonts.inter(color: Colors.black87, fontSize: 18, fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search_rounded, color: Colors.black87),
-            onPressed: () {},
+            icon: Icon(_isSearching ? Icons.close_rounded : Icons.search_rounded, color: Colors.black87),
+            onPressed: () {
+              setState(() {
+                if (_isSearching) {
+                  _isSearching = false;
+                  _searchQuery = '';
+                  _searchController.clear();
+                } else {
+                  _isSearching = true;
+                }
+              });
+            },
           ),
-          IconButton(
-            icon: const Icon(Icons.filter_list_rounded, color: Colors.black87),
-            onPressed: () {},
-          ),
+          if (!_isSearching)
+            IconButton(
+              icon: const Icon(Icons.filter_list_rounded, color: Colors.black87),
+              onPressed: _showFilterSheet,
+            ),
           const SizedBox(width: 8),
         ],
         bottom: PreferredSize(
@@ -35,7 +141,11 @@ class SellerProductsScreen extends StatelessWidget {
       body: ListenableBuilder(
         listenable: MockDashboardState(),
         builder: (context, _) {
-          final products = MockDashboardState().products;
+          var products = MockDashboardState().products;
+          
+          if (_searchQuery.isNotEmpty) {
+            products = products.where((p) => p['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+          }
           
           if (products.isEmpty) {
             return Center(

@@ -20,6 +20,13 @@ class AdminDashboardWrapper extends StatefulWidget {
 
 class _AdminDashboardWrapperState extends State<AdminDashboardWrapper> {
   int _selectedIndex = 0;
+  final FocusNode _searchFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
 
   final List<Widget> _pages = const [
     AdminOverviewScreen(),
@@ -76,13 +83,14 @@ class _AdminDashboardWrapperState extends State<AdminDashboardWrapper> {
                             ),
                           ),
                         ),
-                      // Search Bar Mock
+                      // Search Bar Functional
                       Expanded(
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Container(
                             constraints: const BoxConstraints(maxWidth: 300),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            height: 40,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFAFAFA),
                               borderRadius: BorderRadius.circular(6),
@@ -92,15 +100,39 @@ class _AdminDashboardWrapperState extends State<AdminDashboardWrapper> {
                               children: [
                                 const Icon(Icons.search, size: 16, color: Colors.black54),
                                 const SizedBox(width: 8),
-                                Expanded(child: Text('Rechercher...', style: GoogleFonts.inter(fontSize: 13, color: Colors.black54), overflow: TextOverflow.ellipsis)),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(color: Colors.black12),
+                                Expanded(
+                                  child: TextField(
+                                    focusNode: _searchFocusNode,
+                                    decoration: InputDecoration(
+                                      hintText: 'Rechercher...',
+                                      hintStyle: GoogleFonts.inter(fontSize: 13, color: Colors.black54),
+                                      border: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
+                                    style: GoogleFonts.inter(fontSize: 13, color: Colors.black87),
+                                    onSubmitted: (value) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Recherche (Admin) pour : $value')),
+                                      );
+                                    },
                                   ),
-                                  child: Text('⌘ K', style: GoogleFonts.inter(fontSize: 10, color: Colors.black54, fontWeight: FontWeight.bold)),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    _searchFocusNode.requestFocus();
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(color: Colors.black12),
+                                    ),
+                                    child: Text('⌘ K', style: GoogleFonts.inter(fontSize: 10, color: Colors.black54, fontWeight: FontWeight.bold)),
+                                  ),
                                 ),
                               ],
                             ),
@@ -114,11 +146,17 @@ class _AdminDashboardWrapperState extends State<AdminDashboardWrapper> {
                           final unreadCount = MockMessagingState().globalUnreadCount;
                           return Stack(
                             children: [
-                              IconButton(
-                                icon: const Icon(Icons.chat_bubble_outline, color: Colors.black54),
-                                onPressed: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ConversationsListScreen()));
-                                },
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.04),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.chat_bubble_outline, color: Colors.black87, size: 20),
+                                  onPressed: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ConversationsListScreen()));
+                                  },
+                                ),
                               ),
                               if (unreadCount > 0)
                                 Positioned(
@@ -143,11 +181,17 @@ class _AdminDashboardWrapperState extends State<AdminDashboardWrapper> {
                           final unreadCount = MockNotificationsState().unreadCount;
                           return Stack(
                             children: [
-                              IconButton(
-                                icon: const Icon(Icons.notifications_none, color: Colors.black54),
-                                onPressed: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
-                                },
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.04),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.notifications_none, color: Colors.black87, size: 22),
+                                  onPressed: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
+                                  },
+                                ),
                               ),
                               if (unreadCount > 0)
                                 Positioned(
@@ -166,11 +210,21 @@ class _AdminDashboardWrapperState extends State<AdminDashboardWrapper> {
                           );
                         },
                       ),
-                      const SizedBox(width: 16),
-                      CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Colors.grey.shade200,
-                        child: Text('A', style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13)),
+                      Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFE91E63), Colors.purple],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.white,
+                          child: Text('A', style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13)),
+                        ),
                       ),
                     ],
                   ),
@@ -199,15 +253,22 @@ class _AdminDashboardWrapperState extends State<AdminDashboardWrapper> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.black87,
-                  borderRadius: BorderRadius.circular(8),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFE91E63), Colors.purple],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(color: const Color(0xFFE91E63).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4)),
+                  ],
                 ),
-                child: const Icon(Icons.admin_panel_settings, color: Colors.white, size: 20),
+                child: const Icon(Icons.admin_panel_settings_rounded, color: Colors.white, size: 22),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Text(
                 'ZYRA Admin',
-                style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87, letterSpacing: -0.5),
               ),
             ],
           ),
@@ -238,19 +299,19 @@ class _AdminDashboardWrapperState extends State<AdminDashboardWrapper> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.black.withOpacity(0.04) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          color: isSelected ? const Color(0xFFE91E63).withOpacity(0.08) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: isSelected ? Colors.black87 : Colors.black54),
-            const SizedBox(width: 12),
+            Icon(icon, size: 22, color: isSelected ? const Color(0xFFE91E63) : Colors.grey.shade600),
+            const SizedBox(width: 14),
             Text(
               title,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? Colors.black87 : Colors.black54,
+                color: isSelected ? const Color(0xFFE91E63) : Colors.grey.shade700,
               ),
             ),
           ],

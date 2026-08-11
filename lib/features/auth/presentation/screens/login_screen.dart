@@ -7,6 +7,7 @@ import 'package:zyra_shop/features/auth/providers/auth_providers.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import 'package:zyra_shop/features/home/presentation/home.dart';
+import 'package:zyra_shop/features/admin/presentation/screens/admin_dashboard_wrapper.dart';
 
 // ── Login mode ─────────────────────────────────────────────────────────────────
 enum _LoginMode { email, phone }
@@ -99,9 +100,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       return;
     }
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const HomeNavigationWrapper()),
-    );
+    if (authState.user?.role == 'admin') {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const AdminDashboardWrapper()),
+      );
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeNavigationWrapper()),
+      );
+    }
   }
 
   void _goToRegister() {

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/features/seller/domain/entities/seller_story.dart';
 import 'package:zyra_shop/features/seller/presentation/state/mock_dashboard_state.dart';
 import 'package:zyra_shop/features/seller/presentation/screens/dashboard/seller_story_details_screen.dart';
+import 'seller_create_story_screen.dart';
 
 class SellerStoriesScreen extends StatelessWidget {
   const SellerStoriesScreen({super.key});
@@ -19,7 +20,9 @@ class SellerStoriesScreen extends StatelessWidget {
         title: Text('Stories', style: GoogleFonts.inter(color: Colors.black87, fontSize: 18, fontWeight: FontWeight.bold)),
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerCreateStoryScreen()));
+            },
             child: Text('Publier', style: GoogleFonts.inter(color: const Color(0xFFFF4B72), fontWeight: FontWeight.bold)),
           ),
           const SizedBox(width: 8),
@@ -89,17 +92,7 @@ class SellerStoriesScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          MockDashboardState().addStory(
-            SellerStory(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              sellerId: 'me',
-              sellerName: 'Mon Boutique',
-              sellerAvatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200',
-              contentUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=600',
-              createdAt: DateTime.now(),
-            ),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Story publiée (Mock)')));
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerCreateStoryScreen()));
         },
         backgroundColor: Colors.black87,
         elevation: 4,
@@ -170,13 +163,25 @@ class SellerStoriesScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(child: Text(story.linkedProduct?.name ?? 'Story', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: isActive ? Colors.green.shade50 : Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(isActive ? 'Actif' : 'Expiré', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: isActive ? Colors.green : Colors.grey.shade600)),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: isActive ? Colors.green.shade50 : Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(isActive ? 'Actif' : 'Expiré', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: isActive ? Colors.green : Colors.grey.shade600)),
+                            ),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () {
+                                MockDashboardState().deleteStory(story.id);
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Story supprimée')));
+                              },
+                              child: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                            ),
+                          ],
                         ),
                       ],
                     ),

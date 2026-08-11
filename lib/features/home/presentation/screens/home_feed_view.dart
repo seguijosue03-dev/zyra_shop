@@ -15,11 +15,21 @@ import 'package:zyra_shop/features/notifications/presentation/state/mock_notific
 import 'package:zyra_shop/features/messaging/presentation/screens/conversations_list_screen.dart';
 import 'package:zyra_shop/features/messaging/presentation/state/mock_messaging_state.dart';
 import 'package:zyra_shop/shared/widgets/empty_state_widget.dart';
+import 'package:zyra_shop/features/seller/presentation/state/mock_seller_state.dart';
+import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller_registration_screen.dart';
+import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller_pending_approval_screen.dart';
+import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller_contract_screen.dart';
+import 'package:zyra_shop/features/seller/presentation/screens/dashboard/seller_dashboard_wrapper.dart';
 
 /// Design: 80% white/gray/black neutral, 20% ZYRA brand purple accents.
 /// Inspired by Shein, Zara, Amazon, and Instagram Shopping.
 class HomeFeedView extends StatefulWidget {
-  const HomeFeedView({super.key});
+  final VoidCallback? onNavigateToCategories;
+  
+  const HomeFeedView({
+    super.key,
+    this.onNavigateToCategories,
+  });
 
   @override
   State<HomeFeedView> createState() => _HomeFeedViewState();
@@ -449,15 +459,30 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                   _buildDrawerItem(Icons.home_outlined, 'Accueil', () => Navigator.pop(context)),
                   _buildDrawerItem(Icons.grid_view_outlined, 'Toutes les catégories', () {
                     Navigator.pop(context);
+                    if (widget.onNavigateToCategories != null) {
+                      widget.onNavigateToCategories!();
+                    }
                   }),
                   _buildDrawerItem(Icons.local_offer_outlined, 'Promotions', () {
                     Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Promotions (Mock)')));
                   }),
                   _buildDrawerItem(Icons.storefront_outlined, 'Espace Vendeur', () {
                     Navigator.pop(context);
+                    final status = MockSellerState().status;
+                    if (status == SellerStatus.none) {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerRegistrationScreen()));
+                    } else if (status == SellerStatus.pending) {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerPendingApprovalScreen()));
+                    } else if (status == SellerStatus.contractRequired) {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerContractScreen()));
+                    } else {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerDashboardWrapper()));
+                    }
                   }),
                   _buildDrawerItem(Icons.help_outline, 'Aide & Support', () {
                     Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Aide & Support (Mock)')));
                   }),
                 ],
               ),

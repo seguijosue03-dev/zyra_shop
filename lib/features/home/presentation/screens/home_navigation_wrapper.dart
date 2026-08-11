@@ -32,6 +32,10 @@ class _HomeNavigationWrapperState extends State<HomeNavigationWrapper> {
       // 0. Home Feed (Accueil)
       HomeFeedView(
         key: ValueKey('home_feed_$_initialCategoryFilter'),
+        onNavigateToCategories: () => setState(() {
+          _initialCategoryFilter = 'Tous';
+          _currentIndex = 1;
+        }),
       ),
 
       // 1. Categories Grid (Catégories)

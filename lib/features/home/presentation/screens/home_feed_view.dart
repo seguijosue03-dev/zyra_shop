@@ -7,6 +7,8 @@ import 'package:zyra_shop/core/state/app_state.dart';
 import '../widgets/mock_products.dart';
 import 'package:zyra_shop/features/products/domain/entities/product.dart';
 import '../widgets/product_card.dart';
+import 'package:zyra_shop/features/home/presentation/screens/promotions_screen.dart';
+import 'package:zyra_shop/features/profile/presentation/screens/support_screen.dart';
 import 'package:zyra_shop/features/products/presentation/screens/product_detail_screen.dart';
 import 'package:zyra_shop/features/seller/presentation/state/mock_dashboard_state.dart';
 import 'package:zyra_shop/features/search/presentation/screens/search_screen.dart' as zyra_search;
@@ -20,6 +22,7 @@ import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller
 import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller_pending_approval_screen.dart';
 import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller_contract_screen.dart';
 import 'package:zyra_shop/features/seller/presentation/screens/dashboard/seller_dashboard_wrapper.dart';
+import 'package:zyra_shop/features/cart/presentation/screens/cart_screen.dart';
 
 /// Design: 80% white/gray/black neutral, 20% ZYRA brand purple accents.
 /// Inspired by Shein, Zara, Amazon, and Instagram Shopping.
@@ -94,10 +97,35 @@ class _HomeFeedViewState extends State<HomeFeedView> {
   @override
   Widget build(BuildContext context) {
     final query = _searchCtrl.text.toLowerCase().trim();
+
+    // Map products from MockDashboardState to Product entities
+    final sellerProducts = MockDashboardState().products.map((p) {
+      final imageList = p['images'] as List?;
+      final imageUrl = p['imageUrl'] as String?;
+      
+      // Extract numbers from price string if it contains "FCFA"
+      final priceStr = p['price']?.toString().replaceAll(RegExp(r'[^0-9.]'), '') ?? '0';
+      
+      return Product(
+        id: p['id'].toString(),
+        name: p['name'] ?? 'Produit',
+        price: double.tryParse(priceStr) ?? 0.0,
+        rating: 5.0,
+        ratingCount: 1,
+        imageUrl: imageUrl ?? ((imageList != null && imageList.isNotEmpty)
+            ? imageList.first
+            : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600'),
+        category: p['category'] ?? 'TOUT',
+      );
+    }).toList();
+
+    // Combine newly added seller products with initial feed products
+    final combinedFeed = [...sellerProducts, ..._feedProducts];
+
     List<Product> displayList =
         (query.isEmpty && _selectedCategory == 'Tous')
-            ? _feedProducts
-            : _feedProducts.where((p) {
+            ? combinedFeed
+            : combinedFeed.where((p) {
                 final matchesCat = _selectedCategory == 'Tous' ||
                     p.category == _selectedCategory;
                 final matchesSearch = query.isEmpty ||
@@ -110,7 +138,7 @@ class _HomeFeedViewState extends State<HomeFeedView> {
         _selectedCategory != 'Tous' || query.isNotEmpty;
 
     return ListenableBuilder(
-      listenable: AppState(),
+      listenable: Listenable.merge([AppState(), MockDashboardState()]),
       builder: (context, child) {
         return Scaffold(
           key: _scaffoldKey,
@@ -153,7 +181,7 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                     if (isFilteredMode) ...[
                       const SizedBox(height: 12),
                       _buildFilteredGrid(displayList),
-                    ] else if (_feedProducts.isEmpty) ...[
+                    ] else if (displayList.isEmpty) ...[
                       const SizedBox(height: 40),
                       const EmptyStateWidget(
                         title: 'Aucun produit disponible',
@@ -176,20 +204,23 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                       const SizedBox(height: 24),
 
                       // Trending
-                      _buildHorizontalProductSection(
-                        'Tendances 🔥',
-                        'Voir plus',
-                        _feedProducts.where((p) => p.isTrending).toList(),
-                      ),
-
-                      const SizedBox(height: 24),
+                      if (combinedFeed.any((p) => p.isTrending)) ...[
+                        _buildHorizontalProductSection(
+                          'Tendances 🔥',
+                          'Voir plus',
+                          combinedFeed.where((p) => p.isTrending).toList(),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
 
                       // New Arrivals
-                      _buildHorizontalProductSection(
-                        'Nouveautés ✨',
-                        'Explorer',
-                        _feedProducts.where((p) => p.isNewArrival).toList(),
-                      ),
+                      if (combinedFeed.any((p) => p.isNewArrival)) ...[
+                        _buildHorizontalProductSection(
+                          'Nouveautés ✨',
+                          'Explorer',
+                          combinedFeed.where((p) => p.isNewArrival).toList(),
+                        ),
+                      ],
                     ],
 
                     // Loading spinner
@@ -365,11 +396,12 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                 builder: (context, _) {
                   final cartItemCount = AppState().cartItems.length;
                   return GestureDetector(
-                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Panier'),
-                          behavior: SnackBarBehavior.floating),
-                    ),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => CartScreen(
+                        onNavigateToHome: () => Navigator.pop(context),
+                        onNavigateToFavorites: () => Navigator.pop(context),
+                      )));
+                    },
                     child: SizedBox(
                       width: 36,
                       height: 36,
@@ -465,7 +497,7 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                   }),
                   _buildDrawerItem(Icons.local_offer_outlined, 'Promotions', () {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Promotions (Mock)')));
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const PromotionsScreen()));
                   }),
                   _buildDrawerItem(Icons.storefront_outlined, 'Espace Vendeur', () {
                     Navigator.pop(context);
@@ -482,7 +514,7 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                   }),
                   _buildDrawerItem(Icons.help_outline, 'Aide & Support', () {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Aide & Support (Mock)')));
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const SupportScreen()));
                   }),
                 ],
               ),
@@ -541,13 +573,16 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                       color: Color(0xFF374151),
                       size: 20,
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Rechercher tendances, marques, styles...',
-                      style: GoogleFonts.inter(
-                        color: const Color(0xFF9CA3AF),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
+                    Expanded(
+                      child: Text(
+                        'Rechercher tendances, marques, styles...',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          color: const Color(0xFF9CA3AF),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                     ),
                   ],
@@ -899,6 +934,7 @@ class _HomeFeedViewState extends State<HomeFeedView> {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: ProductCard(
+                  showName: true,
                   product: product,
                   heroTagPrefix: '${title}_',
                   isFavorite: AppState().isFavorite(product.id),
@@ -942,6 +978,7 @@ class _HomeFeedViewState extends State<HomeFeedView> {
         itemBuilder: (context, index) {
           final product = products[index];
           return ProductCard(
+            showName: true,
             product: product,
             heroTagPrefix: 'Grid_',
             isFavorite: AppState().isFavorite(product.id),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
 import 'package:zyra_shop/core/theme/app_text_styles.dart';
+import 'package:zyra_shop/features/orders/domain/entities/order.dart';
+import 'package:zyra_shop/features/profile/presentation/screens/support_screen.dart';
 import '../../domain/entities/order_mock.dart';
 import '../widgets/order_status_badge.dart';
 import 'order_tracking_screen.dart';
@@ -162,9 +164,7 @@ class OrderDetailsScreen extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Ouverture du support client (mock)')),
-                          );
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const SupportScreen()));
                         },
                         child: Text(
                           'Contacter',

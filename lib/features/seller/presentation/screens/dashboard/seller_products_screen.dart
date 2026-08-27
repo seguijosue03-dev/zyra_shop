@@ -73,7 +73,7 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Filtres appliqués (Mock)')));
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Filtres appliqués')));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black87,

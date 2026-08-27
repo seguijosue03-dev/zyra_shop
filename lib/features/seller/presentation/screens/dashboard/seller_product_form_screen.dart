@@ -13,6 +13,11 @@ class SellerProductFormScreen extends StatefulWidget {
 class _SellerProductFormScreenState extends State<SellerProductFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _stockController = TextEditingController();
+
   final List<String> _sizes = ['S', 'M', 'L'];
   final TextEditingController _sizeController = TextEditingController();
 
@@ -23,6 +28,10 @@ class _SellerProductFormScreenState extends State<SellerProductFormScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
+    _descController.dispose();
+    _priceController.dispose();
+    _stockController.dispose();
     _sizeController.dispose();
     _colorController.dispose();
     super.dispose();
@@ -44,16 +53,20 @@ class _SellerProductFormScreenState extends State<SellerProductFormScreen> {
         actions: [
           TextButton(
             onPressed: () {
+              final priceVal = _priceController.text.trim().isEmpty ? '0' : _priceController.text.trim();
+              final nameVal = _nameController.text.trim().isEmpty ? 'Nouveau Produit' : _nameController.text.trim();
+              
               MockDashboardState().addProduct({
                 'id': DateTime.now().millisecondsSinceEpoch.toString(),
-                'name': 'Nouveau Produit',
-                'price': '0 FCFA',
+                'name': nameVal,
+                'price': '$priceVal FCFA',
                 'originalPrice': null,
                 'discount': null,
-                'stock': 10,
+                'stock': int.tryParse(_stockController.text) ?? 10,
                 'imageUrl': 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=200',
                 'status': 'En stock',
                 'statusColor': Colors.green,
+                'category': _selectedCategory ?? 'TOUT',
               });
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Produit enregistré')));
               Navigator.pop(context);
@@ -89,9 +102,9 @@ class _SellerProductFormScreenState extends State<SellerProductFormScreen> {
 
               // Basic Info
               _buildSectionTitle('Informations générales'),
-              _buildTextField('Nom du produit', 'Ex: Robe d\'été florale'),
+              _buildTextField('Nom du produit', 'Ex: Robe d\'été florale', controller: _nameController),
               const SizedBox(height: 16),
-              _buildTextField('Description', 'Décrivez votre produit...', maxLines: 4),
+              _buildTextField('Description', 'Décrivez votre produit...', maxLines: 4, controller: _descController),
               const SizedBox(height: 16),
               _buildDropdownField('Catégorie', 'Sélectionner une catégorie', mockCategories.map((e) => e.name).toList(), _selectedCategory, (val) {
                 setState(() => _selectedCategory = val);
@@ -102,7 +115,7 @@ class _SellerProductFormScreenState extends State<SellerProductFormScreen> {
               _buildSectionTitle('Tarification & Promotion'),
               Row(
                 children: [
-                  Expanded(child: _buildTextField('Prix original (FCFA)', 'Ex: 25000', keyboardType: TextInputType.number)),
+                  Expanded(child: _buildTextField('Prix original (FCFA)', 'Ex: 25000', keyboardType: TextInputType.number, controller: _priceController)),
                   const SizedBox(width: 16),
                   Expanded(child: _buildTextField('Réduction (%)', 'Ex: 20', keyboardType: TextInputType.number)),
                 ],
@@ -123,7 +136,7 @@ class _SellerProductFormScreenState extends State<SellerProductFormScreen> {
 
               // Inventory & Variants
               _buildSectionTitle('Inventaire & Variantes'),
-              _buildTextField('Quantité en stock', 'Ex: 50', keyboardType: TextInputType.number),
+              _buildTextField('Quantité en stock', 'Ex: 50', keyboardType: TextInputType.number, controller: _stockController),
               const SizedBox(height: 16),
               _buildTagsField('Tailles disponibles', 'Ajouter une taille et faire Entrée', _sizes, _sizeController, (val) {
                 setState(() => _sizes.add(val));
@@ -151,13 +164,14 @@ class _SellerProductFormScreenState extends State<SellerProductFormScreen> {
     );
   }
 
-  Widget _buildTextField(String label, String hint, {TextInputType? keyboardType, int maxLines = 1}) {
+  Widget _buildTextField(String label, String hint, {TextInputType? keyboardType, int maxLines = 1, TextEditingController? controller}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: GoogleFonts.inter(fontSize: 13, color: Colors.black87, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         TextFormField(
+          controller: controller,
           keyboardType: keyboardType,
           maxLines: maxLines,
           style: GoogleFonts.inter(fontSize: 15, color: Colors.black),

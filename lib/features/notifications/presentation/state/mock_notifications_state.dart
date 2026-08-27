@@ -19,6 +19,11 @@ class MockNotificationsState extends ChangeNotifier {
     _notifications = [];
   }
 
+  void addNotification(NotificationEntity notification) {
+    _notifications.insert(0, notification);
+    notifyListeners();
+  }
+
   void markAsRead(String id) {
     final index = _notifications.indexWhere((n) => n.id == id);
     if (index != -1 && !_notifications[index].isRead) {

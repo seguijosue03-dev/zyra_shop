@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zyra_shop/core/theme/app_colors.dart';
+import 'package:zyra_shop/features/orders/presentation/screens/orders_list_screen.dart';
 import 'package:zyra_shop/features/home/presentation/screens/home_navigation_wrapper.dart';
 
 class CheckoutSuccessScreen extends StatelessWidget {
@@ -105,10 +106,7 @@ class CheckoutSuccessScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    // Mock action
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Historique des commandes (Mock)')),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const OrdersListScreen()));
                   },
                   child: Text(
                     'Voir mes commandes',

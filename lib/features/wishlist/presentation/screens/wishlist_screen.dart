@@ -4,6 +4,7 @@ import 'package:zyra_shop/core/theme/app_colors.dart';
 import 'package:zyra_shop/core/state/app_state.dart';
 import 'package:zyra_shop/features/home/presentation/widgets/mock_products.dart';
 import 'package:zyra_shop/features/products/domain/entities/product.dart';
+import 'package:zyra_shop/features/seller/presentation/state/mock_dashboard_state.dart';
 import 'package:zyra_shop/features/search/presentation/screens/search_screen.dart' as zyra_search;
 
 class WishlistScreen extends StatefulWidget {
@@ -27,9 +28,28 @@ class _WishlistScreenState extends State<WishlistScreen> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: AppState(),
+      listenable: Listenable.merge([AppState(), MockDashboardState()]),
       builder: (context, _) {
-        final List<Product> allFavoriteProducts = mockProducts
+        final sellerProducts = MockDashboardState().products.map((p) {
+          final imageList = p['images'] as List?;
+          final imageUrl = p['imageUrl'] as String?;
+          final priceStr = p['price']?.toString().replaceAll(RegExp(r'[^0-9.]'), '') ?? '0';
+          return Product(
+            id: p['id'].toString(),
+            name: p['name'] ?? 'Produit',
+            price: double.tryParse(priceStr) ?? 0.0,
+            rating: 5.0,
+            ratingCount: 1,
+            imageUrl: imageUrl ?? ((imageList != null && imageList.isNotEmpty)
+                ? imageList.first
+                : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600'),
+            category: p['category'] ?? 'TOUT',
+          );
+        }).toList();
+
+        final allProducts = [...sellerProducts, ...mockProducts];
+
+        final List<Product> allFavoriteProducts = allProducts
             .where((p) => AppState().favorites.contains(p.id))
             .toList();
             
@@ -108,9 +128,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 10),
                         ),
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Sélecteur de collections (bientôt disponible)')),
-                          );
+                          _showCollectionsBottomSheet(context);
                         },
                         icon: const Icon(Icons.layers_outlined, size: 18),
                         label: Text('Collections', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
@@ -313,6 +331,80 @@ class _WishlistScreenState extends State<WishlistScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showCollectionsBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Text('Mes Collections', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.favorite, color: AppColors.primary),
+                title: Text('Tous mes favoris', style: GoogleFonts.inter()),
+                trailing: const Icon(Icons.check, color: AppColors.primary),
+                onTap: () {
+                  Navigator.pop(ctx);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: Text('Mode Été', style: GoogleFonts.inter()),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Collection Mode Été sélectionnée')));
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: Text('Chaussures', style: GoogleFonts.inter()),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Collection Chaussures sélectionnée')));
+                },
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nouvelle collection créée')));
+                  },
+                  icon: const Icon(Icons.add),
+                  label: Text('Créer une collection', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
     );
   }
 }

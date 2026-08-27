@@ -53,20 +53,20 @@ class SellerSettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               
-              Text('Mode Vacances', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+              Text('Mode hors service', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
               const SizedBox(height: 16),
               _buildSettingCard(
                 children: [
                   _buildToggleRow(
-                    icon: Icons.flight_takeoff_rounded,
-                    title: 'Activer le mode vacances',
+                    icon: Icons.power_settings_new_rounded,
+                    title: 'Activer le mode hors service',
                     subtitle: 'Met votre boutique en pause, les clients ne pourront plus commander.',
                     value: state.vacationMode,
                     onChanged: (val) {
                       state.updateSettings(newVacation: val);
                       if (val) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Boutique mise en pause (Mode Vacances activé)')),
+                          const SnackBar(content: Text('Boutique mise en pause (Mode hors service activé)')),
                         );
                       }
                     },

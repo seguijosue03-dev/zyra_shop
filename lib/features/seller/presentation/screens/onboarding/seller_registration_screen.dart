@@ -13,6 +13,7 @@ class SellerRegistrationScreen extends StatefulWidget {
 
 class _SellerRegistrationScreenState extends State<SellerRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
+  bool _isLogoUploaded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -59,22 +60,42 @@ class _SellerRegistrationScreenState extends State<SellerRegistrationScreen> {
 
               Text('Logo de la boutique', style: GoogleFonts.inter(fontSize: 14, color: Colors.black87, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 32),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.black26, width: 1),
-                ),
-                child: Column(
-                  children: [
-                    const Icon(Icons.cloud_upload_outlined, color: Colors.black87, size: 36),
-                    const SizedBox(height: 12),
-                    Text('Cliquez pour télécharger (Mock)', style: GoogleFonts.inter(fontSize: 14, color: Colors.black87, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 4),
-                    Text('PNG, JPG jusqu\'à 5MB', style: GoogleFonts.inter(fontSize: 12, color: Colors.black54)),
-                  ],
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isLogoUploaded = !_isLogoUploaded;
+                  });
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  decoration: BoxDecoration(
+                    color: _isLogoUploaded ? Colors.green.withValues(alpha: 0.1) : Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: _isLogoUploaded ? Colors.green : Colors.black26, width: 1),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        _isLogoUploaded ? Icons.check_circle_outline : Icons.cloud_upload_outlined,
+                        color: _isLogoUploaded ? Colors.green : Colors.black87,
+                        size: 36,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _isLogoUploaded ? 'Logo_Boutique.png' : 'Cliquez pour télécharger',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: _isLogoUploaded ? Colors.green : Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (!_isLogoUploaded) ...[
+                        const SizedBox(height: 4),
+                        Text('PNG, JPG jusqu\'à 5MB', style: GoogleFonts.inter(fontSize: 12, color: Colors.black54)),
+                      ]
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 48),

@@ -13,6 +13,12 @@ import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller
 import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller_pending_approval_screen.dart';
 import 'package:zyra_shop/features/seller/presentation/screens/onboarding/seller_contract_screen.dart';
 import 'package:zyra_shop/features/seller/presentation/screens/dashboard/seller_dashboard_wrapper.dart';
+import 'package:zyra_shop/features/delivery/presentation/state/mock_delivery_state.dart';
+import 'package:zyra_shop/features/delivery/presentation/screens/onboarding/driver_registration_screen.dart';
+import 'package:zyra_shop/features/delivery/presentation/screens/onboarding/driver_application_status_screen.dart';
+import 'package:zyra_shop/features/delivery/presentation/screens/onboarding/driver_contract_screen.dart';
+import 'package:zyra_shop/features/delivery/presentation/screens/dashboard/driver_dashboard_wrapper.dart';
+import 'package:zyra_shop/features/profile/presentation/screens/support_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback onNavigateHome;
@@ -181,7 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               widget.onNavigateFavorites();
                             }),
                             _buildOrderGridItem(Icons.headset_mic, 'Service\nClient', Colors.deepPurple.shade400, () {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Service Client (Mock)')));
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const SupportScreen()));
                             }),
                           ],
                         ),
@@ -228,6 +234,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerDashboardWrapper()));
                         }
                       }, iconColor: const Color(0xFFFF4B72)),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Divider(),
+                      ),
+                      _buildDriverBanner(context),
                     ],
                   ),
                 ),
@@ -268,6 +279,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDriverBanner(BuildContext context) {
+    return ListenableBuilder(
+      listenable: MockDeliveryState(),
+      builder: (context, _) {
+        final status = MockDeliveryState().status;
+        final isDriver = status == DriverStatus.active;
+
+        return GestureDetector(
+          onTap: () {
+            if (status == DriverStatus.none) {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const DriverRegistrationScreen()));
+            } else if (status == DriverStatus.pending || status == DriverStatus.rejected) {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const DriverApplicationStatusScreen()));
+            } else if (status == DriverStatus.approved || status == DriverStatus.contractPending) {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const DriverContractScreen()));
+            } else {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const DriverDashboardWrapper()));
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF2B2B2B), Color(0xFF1A1A1A)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Text('🚚', style: TextStyle(fontSize: 24)),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isDriver ? 'Tableau de bord Livreur' : 'Devenir livreur ZYRA',
+                        style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        isDriver ? 'Gérez vos livraisons et vos revenus.' : 'Rejoignez le réseau et livrez dans votre zone.',
+                        style: GoogleFonts.inter(fontSize: 12, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 16),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
